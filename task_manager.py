@@ -84,8 +84,11 @@ class TaskManager:
     # ------------------------------------------------------------------
 
     def search(self, keyword: str) -> List[Task]:
-        # TODO: implement case-insensitive keyword search across title and tags
-        pass
+        kw = keyword.lower()
+        return [
+            t for t in self.tasks
+            if kw in t.title.lower() or any(kw in tag.lower() for tag in t.tags)
+        ]
 
     def by_priority(self) -> List[Task]:
         # TODO: return tasks sorted high → medium → low
