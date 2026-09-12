@@ -1,0 +1,686 @@
+<title>Шот 01 — Расходы</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@200;300;400&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<style>
+  :root{
+    --void:#000000;
+    --shell:#07090A;
+    --panel:#0B0F10;
+    --edge:#161C1D;
+    --ice:#F4F9F8;
+    --mute:#69787A;
+    --dim:#3B4749;
+    --teal:#2BD9C0;
+    --deep:#0E3B3A;
+    --blue:#2F6BFF; --cyan:#22D3EE; --green:#34D399; --yellow:#FACC15; --orange:#FB923C;
+    --ease:cubic-bezier(.16,1,.3,1);
+    color-scheme:dark;
+  }
+
+  body{
+    margin:0;
+    background:var(--shell);
+    color:var(--ice);
+    font-family:"Onest","Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{
+    max-width:1100px;
+    margin:0 auto;
+    padding:28px 20px 56px;
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+
+  /* ---- slate header ---- */
+  .slate{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:baseline;
+    gap:8px 26px;
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--mute);
+  }
+  .slate b{color:var(--ice);font-weight:500;}
+  .slate .sep{color:var(--dim);}
+
+  /* ---- the frame ---- */
+  .stage{
+    position:relative;
+    width:100%;
+    aspect-ratio:16/9;
+    max-width:100%;
+    background:var(--void);
+    border:1px solid var(--edge);
+    border-radius:2px;
+    overflow:hidden;
+    isolation:isolate;
+    cursor:pointer;
+  }
+  #rays{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  .vignette{
+    position:absolute;inset:0;
+    background:radial-gradient(115% 85% at 50% 48%,rgba(0,0,0,0) 38%,rgba(0,0,0,.55) 78%,rgba(0,0,0,.9) 100%);
+    pointer-events:none;
+  }
+
+  .composition{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:clamp(22px,4.4vw,54px);
+    padding:0 7%;
+    box-sizing:border-box;
+    text-align:center;
+  }
+
+  .words{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:baseline;
+    justify-content:center;
+    gap:.12em .38em;
+    max-width:14ch;
+    font-weight:200;
+    font-size:clamp(26px,5.3vw,66px);
+    line-height:1.16;
+    letter-spacing:-.015em;
+    text-wrap:balance;
+  }
+  .stage.breathe .words{animation:breathe 4.6s ease-in-out infinite alternate;}
+  @keyframes breathe{
+    from{filter:drop-shadow(0 0 16px rgba(43,217,192,.09)) brightness(.975);}
+    to{filter:drop-shadow(0 0 44px rgba(104,255,232,.26)) brightness(1.045);}
+  }
+
+  .w{
+    display:inline-block;
+    white-space:nowrap;
+    opacity:0;
+    transform:scale(1.075);
+    filter:blur(7px);
+    color:var(--ice);
+  }
+  .w.in{animation:wordIn 1.2s var(--ease) forwards;}
+  @keyframes wordIn{
+    0%{opacity:0;transform:scale(1.075);filter:blur(7px);text-shadow:0 0 0 rgba(43,217,192,0);}
+    30%{opacity:1;text-shadow:0 0 30px rgba(150,255,242,.55),0 0 88px rgba(43,217,192,.26);}
+    100%{opacity:1;transform:scale(1);filter:blur(0);text-shadow:0 0 20px rgba(150,255,242,.18),0 0 58px rgba(43,217,192,.10);}
+  }
+
+  /* ---- the rainbow rule ---- */
+  .rule{
+    position:relative;
+    width:min(58%,560px);
+    height:1.5px;
+    opacity:0;
+    transition:opacity .5s ease;
+  }
+  .rule.on{opacity:1;}
+  .rule .grad,.rule .bloom{
+    position:absolute;inset:0;
+    background:linear-gradient(90deg,var(--blue) 4%,var(--cyan) 28%,var(--green) 52%,var(--yellow) 76%,var(--orange) 98%);
+    clip-path:inset(0 100% 0 0);
+    transition:clip-path 2.4s var(--ease);
+  }
+  .rule .bloom{filter:blur(9px);opacity:.6;transform:scaleY(3.2);}
+  .rule.draw .grad,.rule.draw .bloom{clip-path:inset(0 0 0 0);}
+  .rule .head{
+    position:absolute;
+    top:50%;left:0;
+    width:5px;height:5px;
+    margin:-2.5px 0 0 -2.5px;
+    border-radius:50%;
+    background:#EAFFFB;
+    box-shadow:0 0 12px rgba(255,255,255,.85),0 0 30px rgba(120,230,255,.6);
+    opacity:0;
+    transition:left 2.4s var(--ease),opacity .4s ease;
+  }
+  .rule.draw .head{left:100%;opacity:1;}
+  .rule.done .head{opacity:0;}
+
+  /* resting frame: everything composed */
+  .stage.is-final .w{opacity:1;transform:none;filter:none;text-shadow:0 0 20px rgba(150,255,242,.16),0 0 58px rgba(43,217,192,.09);}
+  .stage.is-final .rule{opacity:1;}
+  .stage.is-final .rule .grad,.stage.is-final .rule .bloom{clip-path:inset(0 0 0 0);transition:none;}
+
+  /* ---- play veil ---- */
+  .veil{
+    position:absolute;inset:0;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    padding-bottom:6%;
+    background:linear-gradient(to top,rgba(0,0,0,.72),rgba(0,0,0,.12) 46%,rgba(0,0,0,0));
+    transition:opacity .45s ease;
+  }
+  .veil.gone{opacity:0;pointer-events:none;}
+  .cue{
+    display:flex;align-items:center;gap:12px;
+    padding:10px 20px 10px 12px;
+    border:1px solid rgba(244,249,248,.16);
+    border-radius:999px;
+    background:rgba(6,10,10,.55);
+    backdrop-filter:blur(6px);
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ice);
+  }
+  .cue .tri{
+    width:0;height:0;
+    border-left:11px solid var(--ice);
+    border-top:7px solid transparent;
+    border-bottom:7px solid transparent;
+    margin-left:6px;
+  }
+
+  .tc{
+    position:absolute;
+    left:14px;bottom:12px;
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+    font-size:10px;letter-spacing:.12em;
+    color:rgba(244,249,248,.42);
+    pointer-events:none;
+  }
+
+  /* ---- transport ---- */
+  .transport{
+    display:flex;align-items:center;gap:14px;
+    flex-wrap:wrap;
+  }
+  button{
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ice);
+    background:var(--panel);
+    border:1px solid var(--edge);
+    border-radius:2px;
+    padding:9px 15px;
+    cursor:pointer;
+    transition:border-color .2s ease,color .2s ease;
+  }
+  button:hover{border-color:#2C3739;}
+  button:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+  button[aria-pressed="true"]{color:var(--mute);}
+
+  .track{
+    position:relative;
+    flex:1 1 240px;
+    height:26px;
+    cursor:pointer;
+  }
+  .track .bed{position:absolute;top:12px;left:0;right:0;height:1px;background:var(--edge);}
+  .track .fill{position:absolute;top:12px;left:0;height:1px;width:0;background:linear-gradient(90deg,var(--deep),var(--teal));}
+  .track .tick{position:absolute;top:8px;width:1px;height:9px;background:#222C2E;}
+  .track .tick.acc{background:#37585A;height:13px;top:6px;}
+  .track .head{position:absolute;top:9px;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:var(--ice);box-shadow:0 0 10px rgba(43,217,192,.7);}
+
+  .readout{
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+    font-size:11px;letter-spacing:.1em;color:var(--mute);
+    font-variant-numeric:tabular-nums;
+    min-width:11ch;
+  }
+
+  /* ---- cue sheet ---- */
+  .sheet{
+    border-top:1px solid var(--edge);
+    padding-top:18px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:1px;
+    background:var(--edge);
+    border-bottom:1px solid var(--edge);
+  }
+  .sheet .row{
+    background:var(--shell);
+    padding:12px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    transition:background .3s ease;
+  }
+  .sheet .row.live{background:var(--panel);}
+  .sheet .row .t{
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+    font-size:11px;letter-spacing:.08em;
+    color:var(--dim);
+    font-variant-numeric:tabular-nums;
+  }
+  .sheet .row.live .t{color:var(--teal);}
+  .sheet .row .v{font-size:15px;font-weight:300;color:var(--mute);}
+  .sheet .row.live .v{color:var(--ice);}
+
+  .notes{
+    font-size:13px;
+    line-height:1.65;
+    color:var(--mute);
+    max-width:62ch;
+  }
+  .notes b{color:var(--ice);font-weight:400;}
+
+  @media (max-width:560px){
+    .wrap{padding:18px 16px 40px;gap:16px;}
+    .words{max-width:12ch;}
+    .readout{min-width:0;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .stage.breathe .words{animation:none;}
+    .w.in{animation-duration:.01ms;}
+    .rule .grad,.rule .bloom,.rule .head{transition-duration:.01ms;}
+  }
+</style>
+
+<div class="wrap">
+  <div class="slate">
+    <span><b>ШОТ 01</b></span>
+    <span class="sep">/</span>
+    <span>13.0 сек <span class="sep">·</span> 24 fps <span class="sep">·</span> 16:9</span>
+    <span class="sep">/</span>
+    <span>камера статична</span>
+    <span class="sep">/</span>
+    <span>8 текстовых реплик</span>
+  </div>
+
+  <div class="stage is-final" id="stage" role="button" tabindex="0" aria-label="Воспроизвести шот">
+    <canvas id="rays"></canvas>
+    <div class="vignette"></div>
+
+    <div class="composition">
+      <div class="words" id="words"></div>
+      <div class="rule" id="rule">
+        <div class="bloom"></div>
+        <div class="grad"></div>
+        <div class="head"></div>
+      </div>
+    </div>
+
+    <div class="tc" id="tc">00:00:00:00</div>
+    <div class="veil" id="veil">
+      <div class="cue">Воспроизвести <span class="tri"></span></div>
+    </div>
+  </div>
+
+  <div class="transport">
+    <button id="play">Play</button>
+    <button id="replay">Сначала</button>
+    <button id="sound" aria-pressed="false">Звук вкл</button>
+    <div class="track" id="track" role="slider" tabindex="0" aria-label="Таймлайн" aria-valuemin="0" aria-valuemax="13" aria-valuenow="0">
+      <div class="bed"></div>
+      <div class="fill" id="fill"></div>
+      <div class="head" id="thead" style="left:0"></div>
+    </div>
+    <div class="readout" id="readout">0.00 / 13.00</div>
+  </div>
+
+  <div class="sheet" id="sheet"></div>
+
+  <p class="notes">
+    Тайминги выставлены покадрово по брифу: реплики через 0.70 с, последняя — на 5.00.
+    С 5.00 до 9.80 композиция «дышит» свечением, на 9.80 радужная линия идёт слева направо за 2.40 с.
+    Свет — объёмные сине-зелёные лучи, рендер квантован в 24 кадра в секунду, поэтому дрейф лучей
+    имеет плёночную каденцию, а не гладкую 60-герцовую. <b>Для mp4</b> — запись экрана этого кадра 16:9.
+  </p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var DUR = 13.0, FPS = 24;
+
+  var CUES = [
+    {t:0.00, w:"А"},
+    {t:0.70, w:"вы"},
+    {t:1.40, w:"знаете,"},
+    {t:2.10, w:"что"},
+    {t:2.80, w:"ваши"},
+    {t:3.50, w:"расходы"},
+    {t:4.20, w:"рассказывают,"},
+    {t:5.00, w:"кто вы?"}
+  ];
+  var BREATHE_AT = 5.00, RULE_AT = 9.80, RULE_DUR = 2.40;
+
+  var stage = document.getElementById("stage"),
+      wordsEl = document.getElementById("words"),
+      ruleEl = document.getElementById("rule"),
+      veil = document.getElementById("veil"),
+      tcEl = document.getElementById("tc"),
+      playBtn = document.getElementById("play"),
+      replayBtn = document.getElementById("replay"),
+      soundBtn = document.getElementById("sound"),
+      track = document.getElementById("track"),
+      fill = document.getElementById("fill"),
+      thead = document.getElementById("thead"),
+      readout = document.getElementById("readout"),
+      sheet = document.getElementById("sheet");
+
+  /* ---------- build words + cue sheet ---------- */
+  var nodes = CUES.map(function(c){
+    var s = document.createElement("span");
+    s.className = "w";
+    s.textContent = c.w;
+    wordsEl.appendChild(s);
+
+    var row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = '<span class="t">' + c.t.toFixed(2) + '</span><span class="v"></span>';
+    row.querySelector(".v").textContent = c.w;
+    sheet.appendChild(row);
+    return {el:s, row:row, t:c.t};
+  });
+
+  (function(){
+    var row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = '<span class="t">9.80</span><span class="v"></span>';
+    row.querySelector(".v").textContent = "радужная линия";
+    sheet.appendChild(row);
+    nodes.ruleRow = row;
+  })();
+
+  CUES.concat([{t:RULE_AT}]).forEach(function(c){
+    var tick = document.createElement("div");
+    tick.className = "tick" + (c.t === RULE_AT ? " acc" : "");
+    tick.style.left = (c.t / DUR * 100) + "%";
+    track.appendChild(tick);
+  });
+
+  /* ---------- volumetric rays ---------- */
+  var cv = document.getElementById("rays"), ctx2d = cv.getContext("2d"), W = 0, H = 0, dpr = 1;
+  var BEAMS = [
+    {x:0.18, y:-0.25, a:-0.42, len:1.55, wid:0.20, hue:"170,240,215", amp:0.055, sp:0.11, ph:0.0},
+    {x:0.52, y:-0.35, a:0.06,  len:1.70, wid:0.26, hue:"120,205,255", amp:0.048, sp:0.08, ph:1.9},
+    {x:0.86, y:-0.22, a:0.40,  len:1.50, wid:0.18, hue:"140,255,225", amp:0.042, sp:0.13, ph:3.4},
+    {x:0.68, y:-0.30, a:0.22,  len:1.35, wid:0.12, hue:"200,255,240", amp:0.030, sp:0.17, ph:5.1}
+  ];
+  var grain = document.createElement("canvas"), gctx = grain.getContext("2d");
+  grain.width = grain.height = 128;
+  (function(){
+    var img = gctx.createImageData(128,128), d = img.data;
+    for (var i=0;i<d.length;i+=4){
+      var v = 128 + (Math.random()*90 - 45);
+      d[i]=d[i+1]=d[i+2]=v; d[i+3]=255;
+    }
+    gctx.putImageData(img,0,0);
+  })();
+
+  function resize(){
+    var r = stage.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.max(1, Math.round(r.width));
+    H = Math.max(1, Math.round(r.height));
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx2d.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener("resize", resize);
+
+  function drawRays(t){
+    ctx2d.clearRect(0,0,W,H);
+    ctx2d.globalCompositeOperation = "lighter";
+    for (var i=0;i<BEAMS.length;i++){
+      var b = BEAMS[i];
+      var drift = Math.sin(t * b.sp + b.ph) * 0.055;
+      var pulse = 0.72 + 0.28 * Math.sin(t * b.sp * 1.7 + b.ph * 1.3);
+      ctx2d.save();
+      ctx2d.translate(b.x * W, b.y * H);
+      ctx2d.rotate(b.a + drift);
+      var len = b.len * H, wid = b.wid * W;
+      var g = ctx2d.createLinearGradient(0,0,0,len);
+      g.addColorStop(0,   "rgba(" + b.hue + "," + (b.amp * pulse) + ")");
+      g.addColorStop(0.45,"rgba(" + b.hue + "," + (b.amp * pulse * 0.55) + ")");
+      g.addColorStop(1,   "rgba(" + b.hue + ",0)");
+      ctx2d.fillStyle = g;
+      ctx2d.filter = "blur(26px)";
+      ctx2d.beginPath();
+      ctx2d.moveTo(-wid*0.22,0);
+      ctx2d.lineTo(wid*0.22,0);
+      ctx2d.lineTo(wid*0.72,len);
+      ctx2d.lineTo(-wid*0.72,len);
+      ctx2d.closePath();
+      ctx2d.fill();
+      ctx2d.restore();
+    }
+    ctx2d.filter = "none";
+    ctx2d.globalCompositeOperation = "overlay";
+    ctx2d.globalAlpha = 0.030;
+    var ox = Math.random()*128, oy = Math.random()*128;
+    for (var x=-128;x<W+128;x+=128) for (var y=-128;y<H+128;y+=128) ctx2d.drawImage(grain, x-ox, y-oy);
+    ctx2d.globalAlpha = 1;
+    ctx2d.globalCompositeOperation = "source-over";
+  }
+
+  /* ---------- sound (synthesised, optional) ---------- */
+  var ac = null, master = null, bus = null, muted = false, verb = null;
+
+  function audio(){
+    if (ac) return ac;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    ac = new AC();
+    master = ac.createGain();
+    master.gain.value = muted ? 0 : 0.9;
+    var comp = ac.createDynamicsCompressor();
+    master.connect(comp); comp.connect(ac.destination);
+
+    verb = ac.createConvolver();
+    var len = Math.floor(ac.sampleRate * 3.0), buf = ac.createBuffer(2, len, ac.sampleRate);
+    for (var ch=0; ch<2; ch++){
+      var d = buf.getChannelData(ch);
+      for (var i=0;i<len;i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 3.1);
+    }
+    verb.buffer = buf;
+    var vg = ac.createGain(); vg.gain.value = 0.5;
+    verb.connect(vg); vg.connect(master);
+    return ac;
+  }
+
+  function newBus(){
+    if (bus) { try { bus.disconnect(); } catch(e){} }
+    bus = ac.createGain();
+    bus.gain.value = 1;
+    bus.connect(master);
+    var send = ac.createGain(); send.gain.value = 0.55;
+    bus.connect(send); send.connect(verb);
+    return bus;
+  }
+
+  function drone(at, dur){
+    [55, 82.5, 110.5].forEach(function(f, i){
+      var o = ac.createOscillator(), g = ac.createGain(), lp = ac.createBiquadFilter();
+      o.type = i === 2 ? "triangle" : "sine";
+      o.frequency.value = f * (1 + (i - 1) * 0.0015);
+      lp.type = "lowpass"; lp.frequency.value = 420;
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(0.05 / (i + 1), at + 2.2);
+      g.gain.setValueAtTime(0.05 / (i + 1), at + dur - 2.4);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      o.connect(lp); lp.connect(g); g.connect(bus);
+      o.start(at); o.stop(at + dur + 0.1);
+    });
+  }
+
+  function blip(at, freq){
+    var o = ac.createOscillator(), g = ac.createGain(), bp = ac.createBiquadFilter();
+    o.type = "sine"; o.frequency.value = freq;
+    bp.type = "bandpass"; bp.frequency.value = freq; bp.Q.value = 3;
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(0.055, at + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.9);
+    o.connect(bp); bp.connect(g); g.connect(bus);
+    o.start(at); o.stop(at + 1.0);
+  }
+
+  function shimmer(at, dur){
+    var n = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain();
+    var len = Math.floor(ac.sampleRate * dur), b = ac.createBuffer(1, len, ac.sampleRate), d = b.getChannelData(0);
+    for (var i=0;i<len;i++) d[i] = (Math.random()*2-1) * 0.5;
+    n.buffer = b;
+    bp.type = "bandpass"; bp.Q.value = 6;
+    bp.frequency.setValueAtTime(700, at);
+    bp.frequency.exponentialRampToValueAtTime(6200, at + dur);
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(0.05, at + dur * 0.75);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur + 0.5);
+    n.connect(bp); bp.connect(g); g.connect(bus);
+    n.start(at); n.stop(at + dur + 0.6);
+  }
+
+  function chord(at){
+    [220, 329.6, 440, 659.3].forEach(function(f, i){
+      var o = ac.createOscillator(), g = ac.createGain(), lp = ac.createBiquadFilter();
+      o.type = "triangle"; o.frequency.value = f;
+      lp.type = "lowpass"; lp.frequency.value = 1800;
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(0.028 / (i * 0.6 + 1), at + 1.4);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 6.0);
+      o.connect(lp); lp.connect(g); g.connect(bus);
+      o.start(at); o.stop(at + 6.2);
+    });
+  }
+
+  function scheduleScore(from){
+    if (!audio()) return;
+    newBus();
+    var base = ac.currentTime + 0.06;
+    function at(t){ return base + (t - from); }
+
+    if (from < DUR) drone(at(Math.max(from, 0)), DUR - Math.max(from, 0));
+    CUES.forEach(function(c, i){
+      if (c.t >= from) blip(at(c.t), 1180 + i * 96);
+    });
+    if (BREATHE_AT >= from) chord(at(BREATHE_AT));
+    if (RULE_AT >= from) shimmer(at(RULE_AT), RULE_DUR);
+    if (RULE_AT + RULE_DUR >= from) blip(at(RULE_AT + RULE_DUR), 1760);
+  }
+
+  /* ---------- timeline ---------- */
+  var playing = false, t = 0, last = 0, acc = 0, frameStep = 1 / FPS;
+
+  function timecode(sec){
+    var s = Math.max(0, sec);
+    var mm = Math.floor(s / 60), ss = Math.floor(s % 60), ff = Math.floor((s % 1) * FPS);
+    return "00:" + String(mm).padStart(2,"0") + ":" + String(ss).padStart(2,"0") + ":" + String(ff).padStart(2,"0");
+  }
+
+  function applyState(time, animate){
+    nodes.forEach(function(n){
+      var on = time >= n.t;
+      n.el.classList.toggle("in", on && animate);
+      if (!animate){
+        n.el.style.opacity = on ? "1" : "";
+        n.el.style.transform = on ? "none" : "";
+        n.el.style.filter = on ? "none" : "";
+      } else {
+        n.el.style.opacity = n.el.style.transform = n.el.style.filter = "";
+      }
+      n.row.classList.toggle("live", on);
+    });
+    stage.classList.toggle("breathe", time >= BREATHE_AT);
+    var ruleOn = time >= RULE_AT;
+    ruleEl.classList.toggle("on", ruleOn);
+    ruleEl.classList.toggle("draw", ruleOn);
+    ruleEl.classList.toggle("done", time >= RULE_AT + RULE_DUR);
+    nodes.ruleRow.classList.toggle("live", ruleOn);
+  }
+
+  function paintTransport(){
+    var p = Math.min(1, t / DUR) * 100;
+    fill.style.width = p + "%";
+    thead.style.left = p + "%";
+    readout.textContent = t.toFixed(2) + " / " + DUR.toFixed(2);
+    tcEl.textContent = timecode(t);
+    track.setAttribute("aria-valuenow", t.toFixed(2));
+  }
+
+  function loop(now){
+    requestAnimationFrame(loop);
+    if (!last) last = now;
+    var dt = (now - last) / 1000;
+    last = now;
+    if (dt > 0.5) dt = frameStep;
+
+    if (playing){
+      t += dt;
+      if (t >= DUR){ t = DUR; playing = false; playBtn.textContent = "Play"; veil.classList.remove("gone"); }
+      paintTransport();
+    }
+    acc += dt;
+    if (acc >= frameStep){
+      acc = acc % frameStep;
+      drawRays(t);
+    }
+  }
+
+  function seek(time, keepPlaying){
+    t = Math.max(0, Math.min(DUR, time));
+    stage.classList.remove("is-final");
+    applyState(-1, false);
+    void stage.offsetWidth;
+    applyState(t, keepPlaying);
+    paintTransport();
+    if (keepPlaying) scheduleScore(t);
+  }
+
+  function start(){
+    if (!audio()) { /* no audio support — visuals still run */ }
+    if (ac && ac.state === "suspended") ac.resume();
+    veil.classList.add("gone");
+    playing = true;
+    playBtn.textContent = "Pause";
+    seek(t >= DUR ? 0 : t, true);
+  }
+
+  function pause(){
+    playing = false;
+    playBtn.textContent = "Play";
+    if (ac) ac.suspend();
+  }
+
+  playBtn.addEventListener("click", function(){ playing ? pause() : start(); });
+  replayBtn.addEventListener("click", function(){ t = 0; start(); });
+  stage.addEventListener("click", function(){ playing ? pause() : start(); });
+  stage.addEventListener("keydown", function(e){
+    if (e.key === " " || e.key === "Enter"){ e.preventDefault(); playing ? pause() : start(); }
+  });
+
+  soundBtn.addEventListener("click", function(){
+    muted = !muted;
+    soundBtn.setAttribute("aria-pressed", String(muted));
+    soundBtn.textContent = muted ? "Звук выкл" : "Звук вкл";
+    if (master) master.gain.value = muted ? 0 : 0.9;
+  });
+
+  function seekFromEvent(e){
+    var r = track.getBoundingClientRect();
+    var x = ((e.touches ? e.touches[0].clientX : e.clientX) - r.left) / r.width;
+    var was = playing;
+    if (ac && ac.state === "suspended" && was) ac.resume();
+    seek(x * DUR, was);
+    if (was) { veil.classList.add("gone"); }
+  }
+  track.addEventListener("click", seekFromEvent);
+  track.addEventListener("keydown", function(e){
+    if (e.key === "ArrowRight"){ e.preventDefault(); seek(t + 0.1, playing); }
+    if (e.key === "ArrowLeft"){ e.preventDefault(); seek(t - 0.1, playing); }
+  });
+
+  /* resting frame = final composition */
+  resize();
+  applyState(DUR, false);
+  nodes.forEach(function(n){ n.row.classList.remove("live"); });
+  nodes.ruleRow.classList.remove("live");
+  stage.classList.remove("breathe");
+  paintTransport();
+  requestAnimationFrame(loop);
+})();
+</script>
