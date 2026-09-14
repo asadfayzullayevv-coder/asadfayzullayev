@@ -26,6 +26,12 @@ export const easeOutQuint = (t: number) => 1 - Math.pow(1 - clamp01(t), 5);
 export const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -11 * clamp01(t)));
 export const easeInQuad = (t: number) => Math.pow(clamp01(t), 2);
 
+/** Symmetric ease used for long camera moves — no overshoot, no linearity. */
+export const easeInOutCubicish = (t: number) => {
+  const c = clamp01(t);
+  return c < 0.5 ? 4 * c * c * c : 1 - Math.pow(-2 * c + 2, 3) / 2;
+};
+
 /**
  * Organic drift in roughly [-1, 1].
  *

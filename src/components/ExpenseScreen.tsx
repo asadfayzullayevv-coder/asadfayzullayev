@@ -26,6 +26,8 @@ export type ExpenseScreenProps = {
   focus?: CategoryId | null;
   focusStrength?: number;
   chart: React.ReactNode;
+  /** Sheets and modals drawn over the screen, inside the device. */
+  overlay?: React.ReactNode;
 };
 
 export const ExpenseScreen: React.FC<ExpenseScreenProps> = ({
@@ -34,6 +36,7 @@ export const ExpenseScreen: React.FC<ExpenseScreenProps> = ({
   focus = null,
   focusStrength = 1,
   chart,
+  overlay,
 }) => {
   const {fps} = useVideoConfig();
   const visible = CATEGORIES.filter(
@@ -135,6 +138,12 @@ export const ExpenseScreen: React.FC<ExpenseScreenProps> = ({
                 height: ROW_H,
                 transform: `translateY(${y + (1 - enter) * 22}px) scale(${0.94 + enter * 0.06})`,
                 opacity: clamp01(enter * 1.4),
+                // Rows physically cross during a reorder. An opaque ground
+                // plus a raised focused row turns that crossing into one card
+                // sliding over another instead of two labels colliding.
+                background: ui.bg,
+                borderRadius: 16,
+                zIndex: isFocus ? 50 : 10,
               }}
             >
               <CategoryRow
@@ -152,6 +161,10 @@ export const ExpenseScreen: React.FC<ExpenseScreenProps> = ({
           );
         })}
       </div>
+
+      {overlay ? (
+        <div style={{position: 'absolute', inset: 0, zIndex: 100}}>{overlay}</div>
+      ) : null}
     </div>
   );
 };

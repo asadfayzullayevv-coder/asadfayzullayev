@@ -1,14 +1,18 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {beatPulse, drift, easeOutExpo, kick} from '../motion';
-import {TOTAL_FRAMES, scenes} from '../timeline';
+import {PHONE_LAYER, TOTAL_FRAMES, scenes} from '../timeline';
+import {CREATED_AT} from '../data/categories';
 
-/** Scene boundaries the camera reacts to. */
+/** Moments the camera reacts to — chapter cuts and the two creation beats. */
 const CUTS = [
+  scenes.reveal.from,
   scenes.entertainment.from,
   scenes.groceries.from,
   scenes.hookah.from,
+  CREATED_AT.hookah,
   scenes.favorite.from,
+  CREATED_AT.favorite,
   scenes.outro.from,
 ];
 
@@ -32,9 +36,9 @@ export const Camera: React.FC<{children: React.ReactNode}> = ({children}) => {
 
   // The reveal gets its own push, resolving as the phone settles.
   const revealPush = interpolate(
-    easeOutExpo(Math.max(0, (frame - scenes.reveal.from) / 110)),
+    easeOutExpo(Math.max(0, (frame - PHONE_LAYER.from) / 130)),
     [0, 1],
-    [1.1, 1],
+    [1.12, 1],
     {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
   );
 

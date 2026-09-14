@@ -30,3 +30,16 @@ export const rampAt = (t: number, white = '#FFFFFF', hot = '#E8213F', deep = '#C
   if (c < 0.55) return mix(white, hot, c / 0.55);
   return mix(hot, deep, (c - 0.55) / 0.45);
 };
+
+/**
+ * The hero ramp: amber -> brand red -> deep pomegranate.
+ *
+ * Sampled per letter so a word reads as one continuous gradient without
+ * measuring layout — the same trick as rampAt, tuned for display sizes where
+ * white would be too flat to carry a whole frame.
+ */
+export const fireAt = (t: number) => {
+  const c = Math.max(0, Math.min(1, t));
+  if (c < 0.5) return mix('#F5A623', '#E8213F', c / 0.5);
+  return mix('#E8213F', '#C8102E', (c - 0.5) / 0.5);
+};

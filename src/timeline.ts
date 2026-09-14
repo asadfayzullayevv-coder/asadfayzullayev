@@ -1,8 +1,8 @@
 /**
  * Single source of truth for the film's timing.
  *
- * The cut is written in seconds, but every accent (text hit, segment pop,
- * logo stamp) is snapped to the musical grid, so re-syncing to the real
+ * The cut is written in seconds, but every accent (type hit, segment pop,
+ * push-through) is snapped to the musical grid, so re-syncing to the real
  * "Trendsetter" waveform later means editing MUSIC only.
  */
 export const FPS = 30;
@@ -14,8 +14,8 @@ export const MUSIC = {
   bpm: 100,
   /** Seconds before the first downbeat of the track. */
   offsetSec: 0,
-  /** The drop after the intro — the phone reveal is cut to land on it. */
-  dropSec: 10,
+  /** The drop after the intro — the type-to-chart morph is cut to land on it. */
+  dropSec: 5,
   src: 'audio/trendsetter.mp3',
   /** Set to true once the licensed file is in public/audio/. */
   enabled: false,
@@ -41,30 +41,38 @@ export type Scene = {
   id: string;
   from: number;
   durationInFrames: number;
+  to: number;
 };
 
 const build = (spec: Array<[string, number, number]>): Record<string, Scene> => {
   const out: Record<string, Scene> = {};
   for (const [id, fromSec, toSec] of spec) {
-    out[id] = {id, from: sec(fromSec), durationInFrames: sec(toSec) - sec(fromSec)};
+    out[id] = {
+      id,
+      from: sec(fromSec),
+      to: sec(toSec),
+      durationInFrames: sec(toSec) - sec(fromSec),
+    };
   }
   return out;
 };
 
 export const scenes = build([
-  ['intro', 0, 10],
-  ['reveal', 10, 22],
-  ['entertainment', 22, 32],
-  ['groceries', 32, 42],
-  ['hookah', 42, 52],
-  ['favorite', 52, 62],
-  ['outro', 62, 66],
+  // Type assembles, becomes the chart, camera flies through it.
+  ['opening', 0, 9],
+  // The handset resolves out of the ring and settles.
+  ['reveal', 9, 13.5],
+  ['entertainment', 13.5, 26],
+  ['groceries', 26, 37.5],
+  ['hookah', 37.5, 52],
+  ['favorite', 52, 68],
+  ['outro', 68, 76],
 ]);
 
-/** The phone is one continuous layer from the reveal to the outro. */
+/** The handset exists from inside the opening morph to the last frame. */
 export const PHONE_LAYER = {
-  from: scenes.reveal.from,
-  durationInFrames: scenes.outro.from + scenes.outro.durationInFrames - scenes.reveal.from,
+  from: sec(6.8),
+  durationInFrames: scenes.outro.to - sec(6.8),
 };
 
-export const TOTAL_FRAMES = scenes.outro.from + scenes.outro.durationInFrames;
+export const TOTAL_FRAMES = scenes.outro.to;

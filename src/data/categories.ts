@@ -23,6 +23,12 @@ export type Category = {
   appearsAt?: number;
 };
 
+/** The frame each custom category is confirmed in the create sheet. */
+export const CREATED_AT = {
+  hookah: scenes.hookah.from + 105,
+  favorite: scenes.favorite.from + 100,
+};
+
 /**
  * Declaration order doubles as the tiebreak when two categories hold the
  * same share; on screen the list is ranked by value (see rowRanksAt).
@@ -37,7 +43,7 @@ export const CATEGORIES: Category[] = [
     label: 'Кальян',
     color: '#14B8A6',
     custom: true,
-    appearsAt: scenes.hookah.from,
+    appearsAt: CREATED_AT.hookah,
   },
   {id: 'sport', label: 'Спорт', color: '#FACC15'},
   {
@@ -46,10 +52,12 @@ export const CATEGORIES: Category[] = [
     // The punchline slice carries the brand red.
     color: '#C8102E',
     custom: true,
-    appearsAt: scenes.favorite.from,
+    appearsAt: CREATED_AT.favorite,
   },
   {id: 'other', label: 'Прочее', color: '#9CA3AF'},
 ];
+
+export const categoryById = (id: CategoryId) => CATEGORIES.find((c) => c.id === id)!;
 
 export type Distribution = Record<CategoryId, number>;
 
@@ -70,16 +78,16 @@ export const STATES = {
   base: dist({entertainment: 18, groceries: 22, transport: 16, cafe: 13, sport: 14, other: 17}),
   entertainment: dist({entertainment: 46, groceries: 14, transport: 11, cafe: 9, sport: 8, other: 12}),
   groceries: dist({entertainment: 12, groceries: 48, transport: 12, cafe: 8, sport: 9, other: 11}),
-  hookah: dist({entertainment: 13, groceries: 19, transport: 10, cafe: 8, hookah: 37, sport: 2, other: 11}),
+  hookah: dist({hookah: 70, entertainment: 6, groceries: 10, transport: 4, cafe: 3, sport: 3, other: 4}),
   favorite: dist({
-    entertainment: 8,
-    groceries: 13,
-    transport: 5,
-    cafe: 4,
-    hookah: 7,
-    sport: 1,
     favorite: 56,
-    other: 6,
+    hookah: 18,
+    entertainment: 5,
+    groceries: 9,
+    transport: 3,
+    cafe: 2,
+    sport: 3,
+    other: 4,
   }),
 };
 
@@ -90,22 +98,27 @@ export const CURRENCY = 'UZS';
 type Keyframe = {frame: number; state: Distribution};
 
 /**
- * The chart morphs on a 3s ease so the eye can follow a single segment
- * growing, and holds long enough for the punchline to land.
+ * Growth windows are cut to the typography, not to the scene boundaries: a
+ * segment starts moving on the same frame its word does, because the whole
+ * point of the film is that the two are one system.
  */
-const MORPH = 90;
-const LEAD_IN = 30;
+export const GROWTH = {
+  entertainment: {from: scenes.entertainment.from + 15, to: scenes.entertainment.from + 95},
+  groceries: {from: scenes.groceries.from + 40, to: scenes.groceries.from + 125},
+  hookah: {from: CREATED_AT.hookah + 10, to: CREATED_AT.hookah + 100},
+  favorite: {from: CREATED_AT.favorite + 10, to: CREATED_AT.favorite + 110},
+};
 
 export const CHART_KEYFRAMES: Keyframe[] = [
-  {frame: scenes.reveal.from, state: STATES.base},
-  {frame: scenes.entertainment.from + LEAD_IN, state: STATES.base},
-  {frame: scenes.entertainment.from + LEAD_IN + MORPH, state: STATES.entertainment},
-  {frame: scenes.groceries.from + LEAD_IN, state: STATES.entertainment},
-  {frame: scenes.groceries.from + LEAD_IN + MORPH, state: STATES.groceries},
-  {frame: scenes.hookah.from + LEAD_IN, state: STATES.groceries},
-  {frame: scenes.hookah.from + LEAD_IN + MORPH, state: STATES.hookah},
-  {frame: scenes.favorite.from + LEAD_IN, state: STATES.hookah},
-  {frame: scenes.favorite.from + LEAD_IN + MORPH, state: STATES.favorite},
+  {frame: scenes.reveal.from - 40, state: STATES.base},
+  {frame: GROWTH.entertainment.from, state: STATES.base},
+  {frame: GROWTH.entertainment.to, state: STATES.entertainment},
+  {frame: GROWTH.groceries.from, state: STATES.entertainment},
+  {frame: GROWTH.groceries.to, state: STATES.groceries},
+  {frame: GROWTH.hookah.from, state: STATES.groceries},
+  {frame: GROWTH.hookah.to, state: STATES.hookah},
+  {frame: GROWTH.favorite.from, state: STATES.hookah},
+  {frame: GROWTH.favorite.to, state: STATES.favorite},
 ];
 
 /** The distribution at any absolute frame of the film. */
@@ -136,6 +149,28 @@ export const distributionAt = (frame: number): Distribution => {
   return out;
 };
 
+/** Normalised share (0–100) — what the UI and the typography both display. */
+export const shareAt = (frame: number, id: CategoryId) => {
+  const values = distributionAt(frame);
+  const total = CATEGORIES.reduce((s, c) => s + values[c.id], 0) || 1;
+  return (values[id] / total) * 100;
+};
+
+/** 0 -> 1 progress of a category's growth window. */
+export const growthProgress = (frame: number, id: keyof typeof GROWTH) => {
+  const w = GROWTH[id];
+  return Math.max(0, Math.min(1, (frame - w.from) / (w.to - w.from)));
+};
+
+/** Which slice is emphasised at a given frame, if any. */
+export const focusAt = (frame: number): CategoryId | null => {
+  if (frame >= GROWTH.favorite.from) return 'favorite';
+  if (frame >= GROWTH.hookah.from) return 'hookah';
+  if (frame >= GROWTH.groceries.from) return 'groceries';
+  if (frame >= GROWTH.entertainment.from) return 'entertainment';
+  return null;
+};
+
 /**
  * Row order for the category list.
  *
@@ -148,7 +183,6 @@ const rankIn = (state: Distribution, visible: CategoryId[]): Record<string, numb
   const sorted = [...visible].sort((a, b) => {
     const d = state[b] - state[a];
     if (Math.abs(d) > 1e-6) return d;
-    // Deterministic tiebreak: declared order.
     return CATEGORIES.findIndex((c) => c.id === a) - CATEGORIES.findIndex((c) => c.id === b);
   });
   const out: Record<string, number> = {};
@@ -181,17 +215,6 @@ export const rowRanksAt = (frame: number, visible: CategoryId[]): Record<string,
     });
   }
   return out;
-};
-
-/** Which slice is emphasised at a given frame, if any. */
-export const focusAt = (frame: number): CategoryId | null => {
-  const f = (s: {from: number; durationInFrames: number}) =>
-    frame >= s.from + LEAD_IN && frame < s.from + s.durationInFrames;
-  if (f(scenes.entertainment)) return 'entertainment';
-  if (f(scenes.groceries)) return 'groceries';
-  if (f(scenes.hookah)) return 'hookah';
-  if (f(scenes.favorite)) return 'favorite';
-  return null;
 };
 
 /** Rounded to the nearest hundred so mid-morph values still read as money. */
