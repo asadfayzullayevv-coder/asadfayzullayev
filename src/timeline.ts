@@ -37,42 +37,11 @@ export const snapToBeat = (frame: number) => {
 
 export const sec = (s: number) => Math.round(s * FPS);
 
-export type Scene = {
-  id: string;
-  from: number;
-  durationInFrames: number;
-  to: number;
-};
+/**
+ * There are no scenes.
+ *
+ * The film is one take; what used to be a scene table now lives as moments in
+ * beats.ts and as a camera path in world.ts. This export is only the length.
+ */
+export const TOTAL_FRAMES = sec(77);
 
-const build = (spec: Array<[string, number, number]>): Record<string, Scene> => {
-  const out: Record<string, Scene> = {};
-  for (const [id, fromSec, toSec] of spec) {
-    out[id] = {
-      id,
-      from: sec(fromSec),
-      to: sec(toSec),
-      durationInFrames: sec(toSec) - sec(fromSec),
-    };
-  }
-  return out;
-};
-
-export const scenes = build([
-  // Type assembles, becomes the chart, camera flies through it.
-  ['opening', 0, 9],
-  // The handset resolves out of the ring and settles.
-  ['reveal', 9, 13.5],
-  ['entertainment', 13.5, 26],
-  ['groceries', 26, 37.5],
-  ['hookah', 37.5, 52],
-  ['favorite', 52, 68],
-  ['outro', 68, 76],
-]);
-
-/** The handset exists from inside the opening morph to the last frame. */
-export const PHONE_LAYER = {
-  from: sec(6.8),
-  durationInFrames: scenes.outro.to - sec(6.8),
-};
-
-export const TOTAL_FRAMES = scenes.outro.to;

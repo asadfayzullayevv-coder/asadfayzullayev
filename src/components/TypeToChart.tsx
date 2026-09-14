@@ -15,6 +15,8 @@ export type TypeToChartProps = {
   size: number;
   /** Diameter of the ring the word resolves into. */
   ring: number;
+  /** 0 -> 1 arrival of the word itself, before any compression begins. */
+  appear?: number;
 };
 
 /**
@@ -33,6 +35,7 @@ export const TypeToChart: React.FC<TypeToChartProps> = ({
   duration = 62,
   size,
   ring,
+  appear = 1,
 }) => {
   const frame = useCurrentFrame();
 
@@ -65,7 +68,25 @@ export const TypeToChart: React.FC<TypeToChartProps> = ({
           whiteSpace: 'nowrap',
         }}
       >
-        <Word text={text} size={size} weight={900} tone="fire" uppercase tracking="-0.03em" />
+        <Word
+          text={text}
+          size={size}
+          weight={900}
+          tone="fire"
+          uppercase
+          tracking="-0.03em"
+          letterStyle={(i, n) => {
+            // The outer letters land last, so the word stretches into place
+            // rather than appearing all at once.
+            const edge = Math.abs(i - (n - 1) / 2) / Math.max(1, (n - 1) / 2);
+            const a = clamp01((appear - edge * 0.25) / 0.75);
+            return {
+              opacity: a,
+              transform: `translateY(${(1 - a) * size * 0.22}px)`,
+              filter: a < 0.98 ? `blur(${(1 - a) * 26}px)` : undefined,
+            };
+          }}
+        />
       </div>
 
       {/* The seed the ring is drawn from. */}

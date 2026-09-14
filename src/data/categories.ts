@@ -1,7 +1,7 @@
 import {interpolate} from 'remotion';
 import {easeOutBack, easeOutCubic} from '../motion';
+import {B} from '../beats';
 import {ease} from '../theme';
-import {scenes} from '../timeline';
 
 export type CategoryId =
   | 'entertainment'
@@ -25,8 +25,8 @@ export type Category = {
 
 /** The frame each custom category is confirmed in the create sheet. */
 export const CREATED_AT = {
-  hookah: scenes.hookah.from + 105,
-  favorite: scenes.favorite.from + 100,
+  hookah: B.created,
+  favorite: B.favCreated,
 };
 
 /**
@@ -78,16 +78,16 @@ export const STATES = {
   base: dist({entertainment: 18, groceries: 22, transport: 16, cafe: 13, sport: 14, other: 17}),
   entertainment: dist({entertainment: 46, groceries: 14, transport: 11, cafe: 9, sport: 8, other: 12}),
   groceries: dist({entertainment: 12, groceries: 48, transport: 12, cafe: 8, sport: 9, other: 11}),
-  hookah: dist({hookah: 70, entertainment: 6, groceries: 10, transport: 4, cafe: 3, sport: 3, other: 4}),
+  hookah: dist({hookah: 67, entertainment: 7, groceries: 11, transport: 5, cafe: 3, sport: 3, other: 4}),
   favorite: dist({
-    favorite: 56,
-    hookah: 18,
+    favorite: 57,
+    hookah: 17,
     entertainment: 5,
     groceries: 9,
-    transport: 3,
+    transport: 4,
     cafe: 2,
     sport: 3,
-    other: 4,
+    other: 3,
   }),
 };
 
@@ -103,14 +103,14 @@ type Keyframe = {frame: number; state: Distribution};
  * point of the film is that the two are one system.
  */
 export const GROWTH = {
-  entertainment: {from: scenes.entertainment.from + 15, to: scenes.entertainment.from + 95},
-  groceries: {from: scenes.groceries.from + 40, to: scenes.groceries.from + 125},
-  hookah: {from: CREATED_AT.hookah + 10, to: CREATED_AT.hookah + 100},
-  favorite: {from: CREATED_AT.favorite + 10, to: CREATED_AT.favorite + 110},
+  entertainment: {from: B.entGrow, to: B.entGrow + 96},
+  groceries: {from: B.greenPush - 60, to: B.greenPush + 30},
+  hookah: {from: B.hookahGrow, to: B.hookahGrow + 96},
+  favorite: {from: B.favGrow, to: B.favGrow + 100},
 };
 
 export const CHART_KEYFRAMES: Keyframe[] = [
-  {frame: scenes.reveal.from - 40, state: STATES.base},
+  {frame: B.phoneIn, state: STATES.base},
   {frame: GROWTH.entertainment.from, state: STATES.base},
   {frame: GROWTH.entertainment.to, state: STATES.entertainment},
   {frame: GROWTH.groceries.from, state: STATES.entertainment},
