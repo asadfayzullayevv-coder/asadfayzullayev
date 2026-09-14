@@ -41,6 +41,8 @@ export type DonutChartProps = {
   focus?: CategoryId | null;
   /** 0 -> 1 strength of the focus emphasis, so it can ease in. */
   focusStrength?: number;
+  /** Degrees of slow idle rotation. Keeps the ring alive between morphs. */
+  sway?: number;
   children?: React.ReactNode;
 };
 
@@ -56,6 +58,7 @@ export const DonutChart: React.FC<DonutChartProps> = ({
   reveal = 1,
   focus = null,
   focusStrength = 1,
+  sway = 0,
   children,
 }) => {
   const cx = size / 2;
@@ -108,42 +111,44 @@ export const DonutChart: React.FC<DonutChartProps> = ({
           strokeWidth={thickness}
         />
 
-        {slices.map(({category, start, end, share}) => {
-          const isFocus = focus === category.id;
-          const clampedEnd = Math.min(end, sweep);
-          if (clampedEnd - start <= 0.2) return null;
+        <g transform={`rotate(${sway} ${cx} ${cy})`}>
+          {slices.map(({category, start, end, share}) => {
+            const isFocus = focus === category.id;
+            const clampedEnd = Math.min(end, sweep);
+            if (clampedEnd - start <= 0.2) return null;
 
-          const inset = Math.min(gap / 2, Math.max(0, (clampedEnd - start) / 2 - 0.1));
-          const s = start + inset;
-          const e = clampedEnd - inset;
+            const inset = Math.min(gap / 2, Math.max(0, (clampedEnd - start) / 2 - 0.1));
+            const s = start + inset;
+            const e = clampedEnd - inset;
 
-          const mid = ((s + e) / 2 - 90) * (Math.PI / 180);
-          const push = isFocus ? 9 * focusStrength : 0;
-          const grow = isFocus ? 4 * focusStrength : 0;
+            const mid = ((s + e) / 2 - 90) * (Math.PI / 180);
+            const push = isFocus ? 9 * focusStrength : 0;
+            const grow = isFocus ? 4 * focusStrength : 0;
 
-          return (
-            <g
-              key={category.id}
-              transform={`translate(${Math.cos(mid) * push} ${Math.sin(mid) * push})`}
-              filter={isFocus ? 'url(#slice-lift)' : undefined}
-              opacity={focus && !isFocus ? 1 - 0.35 * focusStrength : 1}
-            >
-              <path
-                d={ringPath(cx, cy, rOuter + grow, rInner - grow * 0.4, s, e)}
-                fill={`url(#slice-${category.id})`}
-              />
-              {share > 26 ? (
-                <SliceLabel
-                  cx={cx}
-                  cy={cy}
-                  r={(rOuter + rInner) / 2}
-                  angle={(s + e) / 2}
-                  text={`${Math.round((values[category.id] / total) * 100)}%`}
+            return (
+              <g
+                key={category.id}
+                transform={`translate(${Math.cos(mid) * push} ${Math.sin(mid) * push})`}
+                filter={isFocus ? 'url(#slice-lift)' : undefined}
+                opacity={focus && !isFocus ? 1 - 0.35 * focusStrength : 1}
+              >
+                <path
+                  d={ringPath(cx, cy, rOuter + grow, rInner - grow * 0.4, s, e)}
+                  fill={`url(#slice-${category.id})`}
                 />
-              ) : null}
-            </g>
-          );
-        })}
+                {share > 26 ? (
+                  <SliceLabel
+                    cx={cx}
+                    cy={cy}
+                    r={(rOuter + rInner) / 2}
+                    angle={(s + e) / 2}
+                    text={`${Math.round((values[category.id] / total) * 100)}%`}
+                  />
+                ) : null}
+              </g>
+            );
+          })}
+        </g>
       </svg>
 
       <div

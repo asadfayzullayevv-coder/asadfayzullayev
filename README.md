@@ -24,12 +24,14 @@ npm run typecheck
 ```
 src/
   timeline.ts            тайминг всего фильма: сцены, BPM, снап к битам
+  motion.ts              словарь движения: кривые, drift, kick, beatPulse, пружины
   theme.ts               токены: бренд-цвета, типографика, кривые анимации
   fonts.ts               Inter (self-hosted, cyrillic + latin)
   Root.tsx               регистрация композиции
   AnorbankAd.tsx         монтаж: сцены, тексты, музыка
   data/categories.ts     категории, состояния диаграммы, кейфреймы, ранжирование
   components/
+    Camera.tsx           виртуальная камера: push-in, drift, реакция на монтажный стык
     Background.tsx       чёрная сцена, гранатовое свечение, зерно, виньетка
     Phone.tsx            фотореалистичный смартфон (титан, island, блик)
     ExpenseScreen.tsx    светлый интерфейс «Расходы»
@@ -77,6 +79,12 @@ public/
 
 **Бренд.** `src/theme.ts` — цвета и типографика. Точный HEX гранатового
 красного меняется в `brand.red`.
+
+**Моушн.** `src/motion.ts` — единственное место, где живут кривые. `easeOutBack`
+даёт перелёт (рост сегментов, появление слов), `drift` — органическое покачивание
+из трёх синусов, `kick` — импульс на границе сцены, `SPRING` — четыре пресета
+пружин. Амплитуда движения камеры настраивается в `src/components/Camera.tsx`:
+множители при `drift(...)` и `cutZoom`.
 
 **Логотип.** Заменить тело `src/components/Logo.tsx` на
 `<Img src={staticFile('logo/anorbank.svg')} />` — больше нигде логотип не используется.

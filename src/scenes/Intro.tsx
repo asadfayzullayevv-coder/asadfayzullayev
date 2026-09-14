@@ -1,7 +1,8 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {WordReveal} from '../components/WordReveal';
-import {ease, font, stage} from '../theme';
+import {SPRING, clamp01, easeInQuad, easeOutCubic, prog} from '../motion';
+import {font, stage} from '../theme';
 
 /**
  * 0:00–0:10 — black, one question, nothing else.
@@ -9,19 +10,14 @@ import {ease, font, stage} from '../theme';
  */
 export const Intro: React.FC = () => {
   const frame = useCurrentFrame();
-  const {durationInFrames} = useVideoConfig();
+  const {durationInFrames, fps} = useVideoConfig();
 
-  const kicker = interpolate(frame, [6, 30], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: ease.out,
-  });
+  const kickerSpring = spring({frame: frame - 6, fps, config: SPRING.land, durationInFrames: 28});
+  const kicker = clamp01(easeOutCubic(prog(frame, 6, 22)));
 
-  const exit = interpolate(frame, [durationInFrames - 34, durationInFrames - 2], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: ease.in,
-  });
+  // The question doesn't fade out, it lifts away — which hands the drop at
+  // 0:10 an empty frame to land in.
+  const exit = easeInQuad(prog(frame, durationInFrames - 34, 32));
 
   return (
     <AbsoluteFill
@@ -29,8 +25,8 @@ export const Intro: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'center',
         opacity: 1 - exit,
-        transform: `scale(${1 + exit * 0.06})`,
-        filter: `blur(${exit * 12}px)`,
+        transform: `translateY(${-exit * 46}px) scale(${1 + exit * 0.09})`,
+        filter: exit > 0.01 ? `blur(${exit * 16}px)` : undefined,
       }}
     >
       <div
@@ -38,12 +34,12 @@ export const Intro: React.FC = () => {
           fontFamily: font.family,
           fontSize: 19,
           fontWeight: 600,
-          letterSpacing: '0.42em',
           textTransform: 'uppercase',
           color: stage.textFaint,
           marginBottom: 46,
           opacity: kicker,
-          transform: `translateY(${(1 - kicker) * 12}px)`,
+          transform: `translateY(${(1 - kickerSpring) * 16}px)`,
+          letterSpacing: `${0.42 - (1 - kickerSpring) * 0.14}em`,
         }}
       >
         Anorbank

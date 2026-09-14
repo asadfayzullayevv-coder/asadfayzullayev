@@ -1,6 +1,7 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
-import {ease, font, stage} from '../theme';
+import {AbsoluteFill, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {SPRING, clamp01, easeInQuad, prog} from '../motion';
+import {font, stage} from '../theme';
 import {WordReveal} from '../components/WordReveal';
 
 /**
@@ -9,19 +10,10 @@ import {WordReveal} from '../components/WordReveal';
  */
 export const RevealCaption: React.FC = () => {
   const frame = useCurrentFrame();
-  const {durationInFrames} = useVideoConfig();
+  const {durationInFrames, fps} = useVideoConfig();
 
-  const out = interpolate(frame, [durationInFrames - 30, durationInFrames - 6], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: ease.in,
-  });
-
-  const kicker = interpolate(frame, [18, 44], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: ease.out,
-  });
+  const out = easeInQuad(prog(frame, durationInFrames - 30, 24));
+  const kicker = spring({frame: frame - 18, fps, config: SPRING.land, durationInFrames: 30});
 
   return (
     <AbsoluteFill
@@ -29,7 +21,8 @@ export const RevealCaption: React.FC = () => {
         alignItems: 'center',
         paddingTop: 52,
         opacity: 1 - out,
-        transform: `translateY(${-out * 16}px)`,
+        transform: `translateY(${-out * 26}px) scale(${1 - out * 0.03})`,
+        filter: out > 0.01 ? `blur(${out * 8}px)` : undefined,
       }}
     >
       <div
@@ -40,7 +33,8 @@ export const RevealCaption: React.FC = () => {
           letterSpacing: '0.4em',
           textTransform: 'uppercase',
           color: stage.textFaint,
-          opacity: kicker,
+          opacity: clamp01(kicker * 1.5),
+          transform: `translateY(${(1 - kicker) * 14}px)`,
         }}
       >
         Категоризация расходов

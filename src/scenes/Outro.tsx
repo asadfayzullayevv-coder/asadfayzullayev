@@ -1,8 +1,9 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {Logo} from '../components/Logo';
 import {GradientText} from '../components/GradientText';
-import {ease, font, stage} from '../theme';
+import {SPRING, clamp01, drift, easeOutCubic, prog} from '../motion';
+import {font, stage} from '../theme';
 
 /**
  * 1:02–1:06 — the stamp. Logo lands on the beat, the line resolves under it,
@@ -12,17 +13,12 @@ export const Outro: React.FC = () => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
 
-  const land = spring({frame, fps, config: {damping: 200, mass: 0.8, stiffness: 110}});
-  const line = interpolate(frame, [16, 46], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: ease.out,
-  });
-  const sub = interpolate(frame, [34, 62], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: ease.out,
-  });
+  // The mark lands with a bounce; everything after it resolves calmly so the
+  // last seconds settle instead of continuing to move.
+  const land = spring({frame, fps, config: SPRING.bounce, durationInFrames: 30});
+  const line = spring({frame: frame - 16, fps, config: SPRING.land, durationInFrames: 30});
+  const sub = easeOutCubic(prog(frame, 34, 28));
+  const breathe = drift(frame, 2.8) * 4;
 
   return (
     <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
@@ -39,8 +35,8 @@ export const Outro: React.FC = () => {
       <div
         style={{
           marginTop: 54,
-          opacity: line,
-          transform: `translateY(${(1 - line) * 20}px)`,
+          opacity: clamp01(line * 1.5),
+          transform: `translateY(${(1 - line) * 26 + breathe * 0.6}px) scale(${0.97 + line * 0.03})`,
         }}
       >
         <GradientText size={62} weight={800}>

@@ -1,4 +1,5 @@
 import {interpolate} from 'remotion';
+import {easeOutBack, easeOutCubic} from '../motion';
 import {ease} from '../theme';
 import {scenes} from '../timeline';
 
@@ -120,13 +121,17 @@ export const distributionAt = (frame: number): Distribution => {
   const b = kfs[i + 1];
   if (b.frame === a.frame) return b.state;
 
+  const t = (frame - a.frame) / (b.frame - a.frame);
   const out = {} as Distribution;
   for (const c of CATEGORIES) {
-    out[c.id] = interpolate(frame, [a.frame, b.frame], [a.state[c.id], b.state[c.id]], {
-      easing: ease.inOut,
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-    });
+    const from = a.state[c.id];
+    const to = b.state[c.id];
+    // A growing category overshoots its target and pulls back; the ones
+    // giving up room ease in softly. Because the donut normalises by the
+    // running total, that overshoot squeezes every other slice for free —
+    // which is exactly the "one segment pushes, the rest give way" read.
+    const eased = to > from ? easeOutBack(t, 1.4) : easeOutCubic(t);
+    out[c.id] = from + (to - from) * eased;
   }
   return out;
 };

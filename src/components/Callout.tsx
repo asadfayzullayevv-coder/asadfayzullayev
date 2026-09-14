@@ -1,6 +1,7 @@
 import React from 'react';
-import {interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
-import {ease, font, stage} from '../theme';
+import {spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {SPRING, clamp01, drift, easeInQuad, easeOutCubic, prog} from '../motion';
+import {font, stage} from '../theme';
 import {withAlpha} from '../utils/color';
 import {WordReveal} from './WordReveal';
 
@@ -18,8 +19,11 @@ export type CalloutProps = {
 
 /**
  * The left-hand text column that carries each punchline.
- * Enters with the beat, holds, then leaves before the next scene so two
- * headlines never share the frame.
+ *
+ * Blocks hand over laterally: the incoming one springs in from the right,
+ * the outgoing one accelerates away to the left under blur. A pair of
+ * cross-fades in the same spot would read as a slide deck; the shared
+ * direction of travel reads as a camera move.
  */
 export const Callout: React.FC<CalloutProps> = ({
   tag,
@@ -30,20 +34,23 @@ export const Callout: React.FC<CalloutProps> = ({
   delay = 0,
 }) => {
   const frame = useCurrentFrame();
-  const {durationInFrames} = useVideoConfig();
+  const {durationInFrames, fps} = useVideoConfig();
 
-  const inP = interpolate(frame, [delay, delay + 20], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: ease.out,
+  const enter = spring({
+    frame: frame - delay,
+    fps,
+    config: SPRING.land,
+    durationInFrames: 34,
   });
-  const outP = interpolate(frame, [durationInFrames - 22, durationInFrames - 4], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: ease.in,
-  });
+  const visible = easeOutCubic(prog(frame, delay, 20));
+  // Exits accelerate — an ease-in on the way out keeps the cut feeling brisk.
+  const out = easeInQuad(prog(frame, durationInFrames - 26, 22));
 
-  const opacity = inP * (1 - outP);
+  const x = (1 - enter) * 64 - out * 72 + drift(frame, 6.4) * 3;
+  const opacity = clamp01(visible) * (1 - out);
+
+  // The pill leads the headline by a beat and carries its own overshoot.
+  const pill = spring({frame: frame - delay, fps, config: SPRING.bounce, durationInFrames: 28});
 
   return (
     <div
@@ -57,8 +64,9 @@ export const Callout: React.FC<CalloutProps> = ({
         flexDirection: 'column',
         justifyContent: 'center',
         opacity,
-        transform: `translateY(${(1 - inP) * 26 - outP * 22}px)`,
-        filter: `blur(${outP * 8}px)`,
+        transform: `translate(${x}px, ${-out * 14}px) scale(${(0.985 + enter * 0.015) * (1 - out * 0.04)})`,
+        filter: out > 0.01 ? `blur(${out * 10}px)` : undefined,
+        willChange: 'transform, opacity, filter',
       }}
     >
       <div
@@ -70,12 +78,22 @@ export const Callout: React.FC<CalloutProps> = ({
           padding: '10px 18px 10px 14px',
           borderRadius: 999,
           border: `1px solid ${withAlpha(color, 0.35)}`,
-          background: withAlpha(color, 0.10),
+          background: withAlpha(color, 0.1),
           marginBottom: 28,
-          transform: `translateY(${(1 - inP) * 14}px)`,
+          transform: `translateY(${(1 - pill) * 18}px) scale(${0.9 + pill * 0.1})`,
+          opacity: clamp01(pill * 1.6),
         }}
       >
-        <span style={{width: 12, height: 12, borderRadius: 6, background: color, display: 'block'}} />
+        <span
+          style={{
+            width: 12,
+            height: 12,
+            borderRadius: 6,
+            background: color,
+            display: 'block',
+            boxShadow: `0 0 ${10 + pill * 8}px ${withAlpha(color, 0.7)}`,
+          }}
+        />
         <span
           style={{
             fontFamily: font.family,
@@ -106,31 +124,39 @@ export const Callout: React.FC<CalloutProps> = ({
         weight={800}
         lineHeight={1.08}
         stagger={4}
-        delay={delay + 6}
+        delay={delay + 8}
+        duration={30}
         rampFrom={0}
         rampTo={0.92}
       />
 
       {subline ? (
-        <div
-          style={{
-            marginTop: 26,
-            fontFamily: font.family,
-            fontSize: 26,
-            fontWeight: 400,
-            lineHeight: 1.4,
-            color: stage.textMuted,
-            maxWidth: 620,
-            opacity: interpolate(frame, [delay + 22, delay + 44], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-              easing: ease.out,
-            }),
-          }}
-        >
-          {subline}
-        </div>
+        <Subline text={subline} delay={delay + 24} />
       ) : null}
+    </div>
+  );
+};
+
+/** The supporting line rises after the headline has landed. */
+const Subline: React.FC<{text: string; delay: number}> = ({text, delay}) => {
+  const frame = useCurrentFrame();
+  const p = easeOutCubic(prog(frame, delay, 26));
+  return (
+    <div
+      style={{
+        marginTop: 26,
+        fontFamily: font.family,
+        fontSize: 26,
+        fontWeight: 400,
+        lineHeight: 1.4,
+        color: stage.textMuted,
+        maxWidth: 620,
+        opacity: p,
+        transform: `translateY(${(1 - p) * 18}px)`,
+        filter: p < 0.99 ? `blur(${(1 - p) * 6}px)` : undefined,
+      }}
+    >
+      {text}
     </div>
   );
 };

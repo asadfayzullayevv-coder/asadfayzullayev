@@ -1,5 +1,5 @@
 import React from 'react';
-import {interpolate} from 'remotion';
+import {spring, useVideoConfig} from 'remotion';
 import {
   CATEGORIES,
   CategoryId,
@@ -10,7 +10,8 @@ import {
   rowRanksAt,
 } from '../data/categories';
 import {CategoryIcon} from './CategoryIcon';
-import {brand, ease, font, ui} from '../theme';
+import {SPRING, clamp01} from '../motion';
+import {brand, font, ui} from '../theme';
 import {withAlpha} from '../utils/color';
 
 export const SCREEN_W = 390;
@@ -34,11 +35,16 @@ export const ExpenseScreen: React.FC<ExpenseScreenProps> = ({
   focusStrength = 1,
   chart,
 }) => {
+  const {fps} = useVideoConfig();
   const visible = CATEGORIES.filter(
     (c) => c.appearsAt === undefined || frame >= c.appearsAt,
   ).map((c) => c.id);
   const ranks = rowRanksAt(frame, visible);
   const max = Math.max(...visible.map((v) => values[v]), 1);
+  // Normalised against the running total, exactly as the donut does. During
+  // an overshoot the raw values no longer sum to 100, and a list that
+  // disagreed with the chart beside it would give the whole trick away.
+  const total = visible.reduce((sum, id) => sum + values[id], 0) || 1;
 
   return (
     <div
@@ -103,11 +109,14 @@ export const ExpenseScreen: React.FC<ExpenseScreenProps> = ({
           const appeared = c.appearsAt === undefined || frame >= c.appearsAt;
           if (!appeared) return null;
 
+          // A newly created category springs in rather than fading up: it is
+          // the moment the viewer is meant to notice.
           const enter = c.appearsAt
-            ? interpolate(frame, [c.appearsAt, c.appearsAt + 22], [0, 1], {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-                easing: ease.out,
+            ? spring({
+                frame: frame - c.appearsAt,
+                fps,
+                config: SPRING.land,
+                durationInFrames: 26,
               })
             : 1;
 
@@ -124,8 +133,8 @@ export const ExpenseScreen: React.FC<ExpenseScreenProps> = ({
                 right: 0,
                 top: 0,
                 height: ROW_H,
-                transform: `translateY(${y + (1 - enter) * 18}px)`,
-                opacity: enter,
+                transform: `translateY(${y + (1 - enter) * 22}px) scale(${0.94 + enter * 0.06})`,
+                opacity: clamp01(enter * 1.4),
               }}
             >
               <CategoryRow
@@ -133,10 +142,11 @@ export const ExpenseScreen: React.FC<ExpenseScreenProps> = ({
                 label={c.label}
                 color={c.color}
                 custom={c.custom}
-                pct={pct}
+                pct={(pct / total) * 100}
                 fill={pct / max}
                 focus={isFocus}
                 focusStrength={focusStrength}
+                frame={frame}
               />
             </div>
           );
@@ -155,7 +165,8 @@ const CategoryRow: React.FC<{
   fill: number;
   focus: boolean;
   focusStrength: number;
-}> = ({id, label, color, custom, pct, fill, focus, focusStrength}) => (
+  frame: number;
+}> = ({id, label, color, custom, pct, fill, focus, focusStrength, frame}) => (
   <div
     style={{
       height: ROW_H - 6,
@@ -203,15 +214,42 @@ const CategoryRow: React.FC<{
           </div>
         ) : null}
       </div>
-      <div style={{marginTop: 5, height: 4, borderRadius: 4, background: 'rgba(11,15,25,0.06)'}}>
+      <div
+        style={{
+          marginTop: 5,
+          height: 4,
+          borderRadius: 4,
+          background: 'rgba(11,15,25,0.06)',
+          overflow: 'hidden',
+        }}
+      >
         <div
           style={{
+            position: 'relative',
             width: `${Math.max(0, Math.min(1, fill)) * 100}%`,
             height: '100%',
             borderRadius: 4,
             background: color,
+            overflow: 'hidden',
           }}
-        />
+        >
+          {/* A light sweep travels the focused bar so the highlighted row is
+              never a static block of colour. */}
+          {focus ? (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                width: '38%',
+                left: `${((frame * 1.1) % 170) - 40}%`,
+                background:
+                  'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0) 100%)',
+                opacity: 0.7 * Math.min(1, focusStrength),
+              }}
+            />
+          ) : null}
+        </div>
       </div>
     </div>
 

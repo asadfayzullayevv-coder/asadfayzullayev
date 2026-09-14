@@ -1,5 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
+import {drift} from '../motion';
 import {brand, stage} from '../theme';
 
 /**
@@ -9,14 +10,18 @@ import {brand, stage} from '../theme';
  */
 export const Background: React.FC<{intensity?: number}> = ({intensity = 1}) => {
   const frame = useCurrentFrame();
-  const breathe = 1 + Math.sin(frame / 90) * 0.06;
+  // The glow breathes and wanders: a static gradient behind a moving camera
+  // is the one thing that would still read as a still frame.
+  const breathe = 1 + drift(frame, 0.9, 0.7) * 0.09;
+  const glowX = 50 + drift(frame, 3.4, 0.5) * 6;
+  const glowY = 46 + drift(frame, 6.8, 0.4) * 5;
 
   return (
     <AbsoluteFill style={{backgroundColor: stage.bg}}>
       <AbsoluteFill
         style={{
-          background: `radial-gradient(58% 62% at 50% 46%, ${brand.redGlow} 0%, rgba(200,16,46,0.10) 42%, rgba(5,6,10,0) 72%)`,
-          opacity: 0.55 * intensity,
+          background: `radial-gradient(58% 62% at ${glowX}% ${glowY}%, ${brand.redGlow} 0%, rgba(200,16,46,0.10) 42%, rgba(5,6,10,0) 72%)`,
+          opacity: (0.5 + drift(frame, 9.1, 0.6) * 0.08) * intensity,
           transform: `scale(${breathe})`,
         }}
       />
