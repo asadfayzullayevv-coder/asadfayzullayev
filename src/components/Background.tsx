@@ -4,39 +4,49 @@ import {drift} from '../motion';
 import {brand, stage} from '../theme';
 
 /**
- * The stage: a near-black field with a slow-breathing pomegranate glow and a
- * fine grain. Static black reads flat on a 1080p render; this keeps it alive
- * without ever competing with the phone.
+ * A studio, not a black rectangle.
+ *
+ * Three lights and a floor: a cool key from above, a pomegranate bounce that
+ * wanders, and a graded floor that gives the frame a horizon for the product
+ * to sit against. Grain and vignette live here too — they belong to the lens,
+ * which is why nothing in this file is inside the world camera.
  */
 export const Background: React.FC<{intensity?: number}> = ({intensity = 1}) => {
   const frame = useCurrentFrame();
-  // The glow breathes and wanders: a static gradient behind a moving camera
-  // is the one thing that would still read as a still frame.
-  const breathe = 1 + drift(frame, 0.9, 0.7) * 0.09;
-  const glowX = 50 + drift(frame, 3.4, 0.5) * 6;
-  const glowY = 46 + drift(frame, 6.8, 0.4) * 5;
+  const breathe = 1 + drift(frame, 0.9, 0.7) * 0.07;
+  const glowX = 50 + drift(frame, 3.4, 0.5) * 7;
+  const glowY = 44 + drift(frame, 6.8, 0.4) * 5;
 
   return (
     <AbsoluteFill style={{backgroundColor: stage.bg}}>
+      {/* Cool key from above — gives the black a direction. */}
       <AbsoluteFill
         style={{
-          background: `radial-gradient(58% 62% at ${glowX}% ${glowY}%, ${brand.redGlow} 0%, rgba(200,16,46,0.10) 42%, rgba(5,6,10,0) 72%)`,
-          opacity: (0.5 + drift(frame, 9.1, 0.6) * 0.08) * intensity,
+          background:
+            'radial-gradient(72% 52% at 50% -8%, rgba(150,170,205,0.16) 0%, rgba(9,11,18,0) 70%)',
+          opacity: intensity,
+        }}
+      />
+      {/* Graded floor: the frame gets a horizon instead of infinite void. */}
+      <AbsoluteFill
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(0,0,0,0) 52%, rgba(16,18,26,0.55) 84%, rgba(4,5,9,0.9) 100%)',
+          opacity: intensity,
+        }}
+      />
+      {/* Brand bounce, wandering so no two seconds light the same. */}
+      <AbsoluteFill
+        style={{
+          background: `radial-gradient(56% 58% at ${glowX}% ${glowY}%, ${brand.redGlow} 0%, rgba(200,16,46,0.09) 44%, rgba(5,6,10,0) 74%)`,
+          opacity: (0.44 + drift(frame, 9.1, 0.6) * 0.07) * intensity,
           transform: `scale(${breathe})`,
         }}
       />
       <AbsoluteFill
         style={{
           background:
-            'radial-gradient(70% 70% at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 60%)',
-          opacity: intensity,
-        }}
-      />
-      {/* Vignette */}
-      <AbsoluteFill
-        style={{
-          background:
-            'radial-gradient(80% 80% at 50% 50%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.70) 100%)',
+            'radial-gradient(80% 80% at 50% 50%, rgba(0,0,0,0) 42%, rgba(0,0,0,0.74) 100%)',
         }}
       />
       <Grain />
@@ -49,7 +59,6 @@ const GRAIN =
 
 const Grain: React.FC = () => {
   const frame = useCurrentFrame();
-  // Shift the tile every frame so the grain shimmers instead of sitting still.
   const x = (frame * 13) % 180;
   const y = (frame * 7) % 180;
   return (
@@ -57,7 +66,7 @@ const Grain: React.FC = () => {
       style={{
         backgroundImage: GRAIN,
         backgroundPosition: `${x}px ${y}px`,
-        opacity: 0.045,
+        opacity: 0.04,
         mixBlendMode: 'overlay',
         pointerEvents: 'none',
       }}

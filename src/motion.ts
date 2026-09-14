@@ -26,6 +26,39 @@ export const easeOutQuint = (t: number) => 1 - Math.pow(1 - clamp01(t), 5);
 export const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -11 * clamp01(t)));
 export const easeInQuad = (t: number) => Math.pow(clamp01(t), 2);
 
+/**
+ * Damped elastic: overshoots, settles back through one small counter-swing.
+ *
+ * `amp` is deliberately low. A full elastic curve on a data value reads as a
+ * toy; one visible rebound reads as mass. Used for segment growth, where the
+ * chart should feel like it has weight rather than like it is springing.
+ */
+export const easeOutElastic = (t: number, amp = 0.055, period = 0.42) => {
+  const c = clamp01(t);
+  if (c === 0 || c === 1) return c;
+  return 1 + amp * Math.pow(2, -9 * c) * Math.sin(((c - period / 4) * (2 * Math.PI)) / period) * -1;
+};
+
+/**
+ * A number that springs to its target instead of ramping.
+ *
+ * Counters that interpolate linearly are the single most obvious tell that a
+ * UI shot is a render; a spring with a short settle reads as a real ticker.
+ */
+export const springNumber = (
+  frame: number,
+  at: number,
+  from: number,
+  to: number,
+  duration = 34,
+) => {
+  const p = clamp01((frame - at) / duration);
+  if (p <= 0) return from;
+  if (p >= 1) return to;
+  const eased = 1 - Math.pow(2, -10 * p) * Math.cos(p * Math.PI * 2.1);
+  return from + (to - from) * Math.min(1, eased);
+};
+
 /** Symmetric ease used for long camera moves — no overshoot, no linearity. */
 export const easeInOutCubicish = (t: number) => {
   const c = clamp01(t);

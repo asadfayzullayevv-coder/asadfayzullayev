@@ -40,8 +40,13 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
   const shown = open * (1 - close);
   if (shown <= 0.001) return null;
 
-  // The button lights up the moment the category is confirmed.
-  const press = easeOutCubic(prog(frame, confirmAt, 8)) * (1 - easeOutCubic(prog(frame, confirmAt + 8, 14)));
+  // A real press: down fast, back slower, with a ring leaving the contact
+  // point. Scaling a button up on activation is the classic tell of a mock;
+  // hardware goes in.
+  const down = easeOutCubic(prog(frame, confirmAt, 4));
+  const up = easeOutCubic(prog(frame, confirmAt + 4, 16));
+  const press = down * (1 - up);
+  const ripple = clamp01(prog(frame, confirmAt, 26));
   const filled = clamp01(prog(frame, typeAt, name.length * 4));
 
   return (
@@ -93,6 +98,8 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
             borderRadius: 14,
             background: ui.surfaceAlt,
             border: `1.5px solid ${withAlpha(color, 0.35 + filled * 0.35)}`,
+          // The field breathes while it is being typed into.
+          boxShadow: `0 0 0 ${3 + Math.sin(frame / 5) * 1.2}px ${withAlpha(color, 0.09 * (1 - filled * 0.6))}`,
             display: 'flex',
             alignItems: 'center',
             padding: '0 14px',
@@ -139,11 +146,33 @@ export const CategorySheet: React.FC<CategorySheetProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            transform: `scale(${1 - press * 0.03})`,
-            boxShadow: `0 ${8 + press * 14}px ${20 + press * 26}px ${withAlpha(brand.red, 0.3 + press * 0.4)}`,
+            position: 'relative',
+            overflow: 'hidden',
+            transform: `scale(${1 - press * 0.035})`,
+            // The shadow collapses as the button goes down, the way a real
+            // surface loses its gap when pressed.
+            boxShadow: `0 ${10 - press * 7}px ${24 - press * 14}px ${withAlpha(brand.red, 0.34 - press * 0.16)}`,
+            filter: `brightness(${1 - press * 0.08})`,
           }}
         >
-          Создать категорию
+          {ripple > 0 && ripple < 1 ? (
+            <div
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                width: 40,
+                height: 40,
+                marginLeft: -20,
+                marginTop: -20,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.36)',
+                transform: `scale(${0.2 + ripple * 9})`,
+                opacity: 1 - ripple,
+              }}
+            />
+          ) : null}
+          <span style={{position: 'relative'}}>Создать категорию</span>
         </div>
       </div>
     </div>

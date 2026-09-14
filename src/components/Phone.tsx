@@ -36,8 +36,9 @@ export const Phone: React.FC<PhoneProps> = ({children, glare = 0.5, glarePositio
         padding: 2.5,
         boxShadow: [
           '0 2px 2px rgba(255,255,255,0.10) inset',
-          '0 60px 120px rgba(0,0,0,0.55)',
-          '0 18px 44px rgba(0,0,0,0.45)',
+          '0 72px 140px rgba(0,0,0,0.62)',
+          '0 24px 56px rgba(0,0,0,0.5)',
+          '0 6px 14px rgba(0,0,0,0.4)',
           '0 0 0 1px rgba(255,255,255,0.06)',
         ].join(', '),
         ...style,
@@ -68,14 +69,40 @@ export const Phone: React.FC<PhoneProps> = ({children, glare = 0.5, glarePositio
       >
         {children}
 
-        {/* Glass reflection */}
+        {/* Glass, in three parts.
+            A broad environment reflection the studio casts across the panel… */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
             pointerEvents: 'none',
-            background: `linear-gradient(${112}deg, rgba(255,255,255,0) ${glarePosition * 100 - 26}%, rgba(255,255,255,${0.30 * glare}) ${glarePosition * 100}%, rgba(255,255,255,0) ${glarePosition * 100 + 22}%)`,
+            background:
+              'linear-gradient(158deg, rgba(214,230,255,0.16) 0%, rgba(214,230,255,0.05) 22%, rgba(255,255,255,0) 46%, rgba(255,180,196,0.05) 82%, rgba(255,180,196,0.12) 100%)',
             mixBlendMode: 'screen',
+          }}
+        />
+        {/* …a hard specular streak that travels as the device turns… */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background: `linear-gradient(112deg, rgba(255,255,255,0) ${glarePosition * 100 - 26}%, rgba(255,255,255,${0.32 * glare}) ${glarePosition * 100}%, rgba(255,255,255,0) ${glarePosition * 100 + 22}%)`,
+            mixBlendMode: 'screen',
+          }}
+        />
+        {/* …and a thin catch along the top edge where the glass curves. */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 26,
+            right: 26,
+            top: 0,
+            height: 3,
+            pointerEvents: 'none',
+            background:
+              'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%)',
+            filter: 'blur(1.2px)',
           }}
         />
         {/* Edge darkening so the screen sits inside the glass */}
@@ -84,7 +111,7 @@ export const Phone: React.FC<PhoneProps> = ({children, glare = 0.5, glarePositio
             position: 'absolute',
             inset: 0,
             pointerEvents: 'none',
-            boxShadow: 'inset 0 0 24px rgba(0,0,0,0.10)',
+            boxShadow: 'inset 0 0 26px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.5)',
             borderRadius: INNER_R,
           }}
         />

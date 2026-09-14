@@ -85,9 +85,14 @@ export const ExpenseScreen: React.FC<ExpenseScreenProps> = ({
       <div
         style={{
           margin: '14px 16px 0',
-          background: ui.surface,
+          // Glass: translucent white over the app ground, a hairline catch of
+          // light on the top edge, and a layered shadow so the card sits above
+          // the surface rather than being pasted onto it.
+          background: 'linear-gradient(160deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.78) 100%)',
+          border: '1px solid rgba(255,255,255,0.85)',
           borderRadius: 26,
-          boxShadow: ui.shadow,
+          boxShadow:
+            '0 1px 0 rgba(255,255,255,0.9) inset, 0 10px 24px rgba(11,15,25,0.07), 0 2px 5px rgba(11,15,25,0.05)',
           padding: '14px 0 10px',
           display: 'flex',
           justifyContent: 'center',
@@ -141,8 +146,10 @@ export const ExpenseScreen: React.FC<ExpenseScreenProps> = ({
                 // Rows physically cross during a reorder. An opaque ground
                 // plus a raised focused row turns that crossing into one card
                 // sliding over another instead of two labels colliding.
-                background: ui.bg,
+                background: 'rgba(255,255,255,0.55)',
+                border: '1px solid rgba(255,255,255,0.6)',
                 borderRadius: 16,
+                boxShadow: '0 1px 3px rgba(11,15,25,0.04)',
                 zIndex: isFocus ? 50 : 10,
               }}
             >
@@ -331,6 +338,13 @@ const Battery: React.FC = () => (
   </svg>
 );
 
+/**
+ * The centre readout.
+ *
+ * The amount is handed in already sprung (see PhoneObject) rather than ramped:
+ * a linearly counting number is the clearest tell that a UI shot was rendered
+ * rather than captured.
+ */
 export const ScreenCenterLabel: React.FC<{pct?: number; caption: string; amount: number}> = ({
   caption,
   amount,

@@ -68,6 +68,7 @@ const Entertainment: React.FC<{frame: number}> = ({frame}) => {
                 size={150 + share * 1.3}
                 weight={900}
                 tone="fire"
+                glow={0.55}
                 uppercase
                 tracking="-0.05em"
                 letterStyle={(i) => {
@@ -137,6 +138,7 @@ const Entertainment: React.FC<{frame: number}> = ({frame}) => {
             size={214}
             weight={900}
             tone="fire"
+            glow={0.6}
             uppercase
             tracking="-0.055em"
             letterStyle={(i) => {
@@ -202,6 +204,7 @@ const Food: React.FC<{frame: number}> = ({frame}) => {
               size={168}
               weight={900}
               tone="fire"
+              glow={0.5}
               uppercase
               tracking="-0.05em"
               letterStyle={(i) => {

@@ -1,5 +1,5 @@
 import {interpolate} from 'remotion';
-import {easeOutBack, easeOutCubic} from '../motion';
+import {easeOutCubic, easeOutElastic} from '../motion';
 import {B} from '../beats';
 import {ease} from '../theme';
 
@@ -139,11 +139,12 @@ export const distributionAt = (frame: number): Distribution => {
   for (const c of CATEGORIES) {
     const from = a.state[c.id];
     const to = b.state[c.id];
-    // A growing category overshoots its target and pulls back; the ones
-    // giving up room ease in softly. Because the donut normalises by the
-    // running total, that overshoot squeezes every other slice for free —
-    // which is exactly the "one segment pushes, the rest give way" read.
-    const eased = to > from ? easeOutBack(t, 1.4) : easeOutCubic(t);
+    // A growing category arrives on a damped elastic curve — it overshoots,
+    // swings back once, and settles; the ones giving up room ease in softly.
+    // Because the donut normalises by the running total, that overshoot
+    // squeezes every other slice for free, which is exactly the "one segment
+    // pushes, the rest give way" read.
+    const eased = to > from ? easeOutElastic(t) : easeOutCubic(t);
     out[c.id] = from + (to - from) * eased;
   }
   return out;

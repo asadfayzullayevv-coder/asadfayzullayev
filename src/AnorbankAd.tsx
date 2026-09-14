@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Audio, staticFile} from 'remotion';
 import {Background} from './components/Background';
+import {Particles} from './components/Particles';
 import {ActChapters} from './film/ActChapters';
 import {ActOpening} from './film/ActOpening';
 import {ActPunch} from './film/ActPunch';
@@ -28,6 +29,7 @@ export const AnorbankAd: React.FC = () => (
     {MUSIC.enabled ? <Audio src={staticFile(MUSIC.src)} /> : null}
 
     <AbsoluteFill style={{overflow: 'hidden'}}>
+      <Particles />
       <PhoneObject />
       <ActOpening />
       <ActChapters />

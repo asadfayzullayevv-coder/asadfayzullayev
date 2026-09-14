@@ -1,6 +1,6 @@
 import {B} from './beats';
 import {Key, sample} from './keyframes';
-import {clamp01, drift} from './motion';
+import {clamp01, drift, kick} from './motion';
 import {chartWorld} from './phonePath';
 
 /**
@@ -117,6 +117,13 @@ const lookWeight = (frame: number) => {
 
 export const cameraAt = (frame: number): Cam => {
   const cam = sample(CAM, CAM_BASE, frame);
+
+  // Micro-interaction punches: the camera leans in a few percent the instant
+  // a category is confirmed. Small enough to be felt rather than seen, which
+  // is the only size at which this trick stays classy.
+  const tap = kick(frame, B.created, 26) + kick(frame, B.favCreated, 26);
+  cam.zoom *= 1 + tap * 0.035;
+  cam.y -= tap * 12;
 
   const look = lookWeight(frame);
   if (look > 0) {

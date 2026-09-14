@@ -73,6 +73,7 @@ const Hookah: React.FC<{frame: number}> = ({frame}) => {
               size={168}
               weight={900}
               tone="fire"
+              glow={0.6}
               tracking="-0.055em"
               letterStyle={(i) => {
                 const p = easeOutExpo(prog(frame, B.kalyan + 8 + i * 2, 26));
@@ -130,6 +131,7 @@ const Hookah: React.FC<{frame: number}> = ({frame}) => {
               size={238}
               weight={900}
               tone="fire"
+              glow={0.6}
               uppercase
               tracking="-0.055em"
               letterStyle={(i) => {
@@ -179,6 +181,7 @@ const Favorite: React.FC<{frame: number}> = ({frame}) => {
               size={180}
               weight={900}
               tone="fire"
+              glow={0.65}
               tracking="-0.06em"
               letterStyle={(i) => {
                 const p = easeOutExpo(prog(frame, B.num + i * 3, 30));
@@ -264,6 +267,7 @@ const Punchline: React.FC<{frame: number; beat: ReturnType<typeof beatAt>}> = ({
           size={218}
           weight={900}
           tone="fire"
+          glow={0.7}
           uppercase
           tracking="-0.05em"
           letterStyle={(i) => {

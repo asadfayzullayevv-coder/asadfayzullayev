@@ -1,6 +1,9 @@
 import React from 'react';
 import {CATEGORIES, Category, CategoryId, Distribution} from '../data/categories';
-import {withAlpha} from '../utils/color';
+import {mix, withAlpha} from '../utils/color';
+
+const lighten = (hex: string, amount: number) => mix(hex, '#FFFFFF', amount);
+const darken = (hex: string, amount: number) => mix(hex, '#0B0F19', amount);
 
 const polar = (cx: number, cy: number, r: number, deg: number) => {
   const a = ((deg - 90) * Math.PI) / 180;
@@ -84,17 +87,40 @@ export const DonutChart: React.FC<DonutChartProps> = ({
     <div style={{position: 'relative', width: size, height: size}}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <defs>
+          {/* Each segment is lit rather than filled: a bright inner edge, the
+              body colour, and a slightly deepened outer edge. That vertical
+              ramp is what reads as a machined surface instead of flat paint. */}
           {slices.map(({category}) => (
-            <radialGradient
+            <linearGradient
               key={category.id}
               id={`slice-${category.id}`}
-              cx="50%"
-              cy="50%"
-              r="50%"
+              x1="0"
+              y1="0"
+              x2="0.35"
+              y2="1"
             >
-              <stop offset="60%" stopColor={category.color} />
-              <stop offset="100%" stopColor={withAlpha(category.color, 0.86)} />
-            </radialGradient>
+              <stop offset="0%" stopColor={lighten(category.color, 0.3)} />
+              <stop offset="42%" stopColor={category.color} />
+              <stop offset="100%" stopColor={darken(category.color, 0.16)} />
+            </linearGradient>
+          ))}
+          {slices.map(({category}) => (
+            <filter
+              key={`glow-${category.id}`}
+              id={`slice-glow-${category.id}`}
+              x="-45%"
+              y="-45%"
+              width="190%"
+              height="190%"
+            >
+              <feDropShadow
+                dx="0"
+                dy="4"
+                stdDeviation="7"
+                floodColor={category.color}
+                floodOpacity="0.55"
+              />
+            </filter>
           ))}
           <filter id="slice-lift" x="-40%" y="-40%" width="180%" height="180%">
             <feDropShadow dx="0" dy="6" stdDeviation="9" floodOpacity="0.22" />
@@ -129,12 +155,19 @@ export const DonutChart: React.FC<DonutChartProps> = ({
               <g
                 key={category.id}
                 transform={`translate(${Math.cos(mid) * push} ${Math.sin(mid) * push})`}
-                filter={isFocus ? 'url(#slice-lift)' : undefined}
+                // The emphasised slice gets its own colour as a glow: the one
+              // place in a light UI where neon reads as premium rather than cheap.
+              filter={isFocus ? `url(#slice-glow-${category.id})` : undefined}
                 opacity={focus && !isFocus ? 1 - 0.35 * focusStrength : 1}
               >
                 <path
                   d={ringPath(cx, cy, rOuter + grow, rInner - grow * 0.4, s, e)}
                   fill={`url(#slice-${category.id})`}
+                />
+                {/* Specular: a thin bright arc riding the outer edge. */}
+                <path
+                  d={ringPath(cx, cy, rOuter + grow, rOuter + grow - thickness * 0.22, s, e)}
+                  fill="rgba(255,255,255,0.26)"
                 />
                 {share > 26 ? (
                   <SliceLabel
