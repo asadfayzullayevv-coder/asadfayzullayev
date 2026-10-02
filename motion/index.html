@@ -49,7 +49,7 @@
   .eyebrow::before { content: ''; width: 46px; height: 3px; background: #F4AFC2; display: block; }
   .head { margin-top: 26px; font-size: 80px; font-weight: 800; letter-spacing: -2.5px; line-height: 1.04; }
   .sub { margin-top: 22px; font-size: 40px; font-weight: 500; color: rgba(255,255,255,.72); letter-spacing: -0.5px; line-height: 1.2; }
-  .mask { overflow: hidden; padding-bottom: 6px; margin-bottom: -6px; }
+  .mask { overflow: hidden; padding: 0.3em 0 6px; margin: -0.3em 0 -6px; }
   .line { display: block; will-change: transform; }
 
   /* logo */
@@ -101,10 +101,37 @@
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const lerp = (a, b, p) => a + (b - a) * p;
 const prog = (t, a, b) => clamp((t - a) / (b - a));
-const eOut = p => 1 - Math.pow(1 - p, 3);
-const eExpo = p => p >= 1 ? 1 : 1 - Math.pow(2, -10 * p);
-const eInOut = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-const eQuint = p => p < .5 ? 16 * p ** 5 : 1 - Math.pow(-2 * p + 2, 5) / 2;
+// cubic-bezier(x1, y1, x2, y2) solver, same curve definition as CSS
+function cubicBezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const sx = u => ((ax * u + bx) * u + cx) * u, sy = u => ((ay * u + by) * u + cy) * u;
+  const dx = u => (3 * ax * u + 2 * bx) * u + cx;
+  return p => {
+    if (p <= 0) return 0; if (p >= 1) return 1;
+    let u = p;
+    for (let i = 0; i < 8; i++) { const e = sx(u) - p, d = dx(u); if (Math.abs(e) < 1e-6) return sy(u); if (Math.abs(d) < 1e-6) break; u -= e / d; }
+    let lo = 0, hi = 1; u = p;
+    while (hi - lo > 1e-6) { const v = sx(u); if (v < p) lo = u; else hi = u; u = (lo + hi) / 2; }
+    return sy(u);
+  };
+}
+const ease = cubicBezier(0.16, 1, 0.3, 1);          // Apple / Framer "expo out"
+const tw = (t, start, dur) => ease(prog(t, start, start + dur));
+
+// Damped spring (mass 1, stiffness 180, damping 12): exact step response, 0 -> 1.
+// Linear system, so retargeting = summing springs started at each new target.
+const SPRING = { stiffness: 180, damping: 12, mass: 1 };
+function spring(dt) {
+  if (dt <= 0) return 0;
+  const { stiffness: k, damping: c, mass: m } = SPRING;
+  const w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+  if (z < 1) {
+    const wd = w0 * Math.sqrt(1 - z * z);
+    return 1 - Math.exp(-z * w0 * dt) * (Math.cos(wd * dt) + (z * w0 / wd) * Math.sin(wd * dt));
+  }
+  return 1 - Math.exp(-w0 * dt) * (1 + w0 * dt);
+}
 const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 const mix = (a, b, p) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], p))).join(',')})`; };
 const fmt = n => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
@@ -166,7 +193,7 @@ const KEYS = [
 function valuesAt(t) {
   for (let i = 0; i < KEYS.length - 1; i++) {
     const [ta, va] = KEYS[i], [tb, vb] = KEYS[i + 1];
-    if (t <= tb) { const p = eInOut(prog(t, ta, tb)); return va.map((v, j) => lerp(v, vb[j], p)); }
+    if (t <= tb) { const p = ease(prog(t, ta, tb)); return va.map((v, j) => lerp(v, vb[j], p)); }
   }
   return KEYS[KEYS.length - 1][1];
 }
@@ -215,20 +242,18 @@ function renderText(t) {
     const vis = t >= b.t0 - 0.01 && t < b.t1;
     b.el.style.display = vis ? '' : 'none';
     if (!vis) return;
-    const out = eInOut(prog(t, b.t1 - 0.35, b.t1));
-    b.el.style.opacity = 1 - out;
-    b.el.style.transform = `translateY(${-30 * out}px)`;
+    b.el.style.opacity = 1 - tw(t, b.t1 - 0.35, 0.35);
+    b.el.style.transform = `translateY(${-30 * spring(t - (b.t1 - 0.35))}px)`;
     b.lines.forEach(l => {
-      const p = eExpo(prog(t, l.at, l.at + 0.9));
-      l.el.style.transform = `translateY(${(1 - p) * 110}%)`;
-      l.el.style.opacity = l.kind === 'eyebrow' ? clamp(p * 2) : 1;
+      l.el.style.transform = `translateY(${(1 - spring(t - l.at)) * 125}%)`;
+      l.el.style.opacity = l.kind === 'eyebrow' ? tw(t, l.at, 0.5) : 1;
     });
   });
 }
 
 // ---------------- pie ----------------
 const ctx = $('pie').getContext('2d');
-function drawPie(vals, reveal, focus, focusAmt, dec) {
+function drawPie(vals, reveal, focus, pop, fadeAmt, dec) {
   ctx.clearRect(0, 0, 520, 520);
   const cx = 260, cy = 260, RO = 222, RI = 98, GAP = 7;
   const total = vals.reduce((a, b) => a + b, 0);
@@ -239,14 +264,14 @@ function drawPie(vals, reveal, focus, focusAmt, dec) {
     const span = v / total * Math.PI * 2 * reveal;
     const a0 = a, a1 = a + span; a += span;
     const isF = i === focus;
-    const ro = RO + (isF ? 24 * focusAmt : 0), ri = RI;
+    const ro = RO + (isF ? 24 * pop : 0), ri = RI;
     if (span * ri < GAP + 1.5) return;
     let rr = clamp((span * ri - GAP) / 2, 0.5, 18);
     rr = Math.min(rr, (ro - ri) / 2 - 1);
     const roI = ro - rr, riI = ri + rr;
     const insO = (GAP / 2 + rr) / roI;
     const insI = Math.min((GAP / 2 + rr) / riI, span / 2 - 0.0001);
-    const fade = (isF || focus < 0) ? 0 : clamp(0.62 * focusAmt);
+    const fade = (isF || focus < 0) ? 0 : clamp(0.62 * fadeAmt);
     const col = fade > 0 ? mix(CATS[i].color, '#F3F3F6', fade) : CATS[i].color;
     ctx.beginPath();
     ctx.arc(cx, cy, roI, a0 + insO, Math.max(a0 + insO, a1 - insO));
@@ -260,8 +285,8 @@ function drawPie(vals, reveal, focus, focusAmt, dec) {
   });
   labels.forEach(l => {
     ctx.save();
-    ctx.globalAlpha = (l.isF || focus < 0) ? 1 : 1 - 0.5 * focusAmt;
-    ctx.font = `700 ${Math.round(31 * (l.isF ? 1 + 0.3 * focusAmt : 1))}px Inter`;
+    ctx.globalAlpha = (l.isF || focus < 0) ? 1 : 1 - 0.5 * fadeAmt;
+    ctx.font = `700 ${Math.round(31 * (l.isF ? 1 + 0.3 * pop : 1))}px Inter`;
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     const r10 = Math.round(l.v * 10) / 10;
     const txt = l.v < 1 ? '<1%' : (dec && r10 % 1 ? r10.toFixed(1) : Math.round(l.v)) + '%';
@@ -275,8 +300,9 @@ function renderRows(t, vals, sc) {
   const out = [];
   sc.rows.forEach((ci, k) => {
     const c = CATS[ci];
-    const p = eExpo(prog(t, sc.t0 + 0.1 + k * 0.07, sc.t0 + 0.9 + k * 0.07));
-    const fp = sc.focusAt ? eOut(prog(t, sc.focusAt, sc.focusAt + 0.5)) * (1 - prog(t, sc.t1 - 0.3, sc.t1)) : 0;
+    const st = sc.t0 + 0.1 + k * 0.07;
+    const p = tw(t, st, 0.6), y = (1 - spring(t - st)) * 50;
+    const fp = sc.focusAt ? clamp(tw(t, sc.focusAt, 0.5) - tw(t, sc.t1 - 0.3, 0.3)) : 0;
     const isF = ci === sc.focus;
     const txt = ci === 9 ? `${c.tx} ${plural(c.tx, 'категория', 'категории', 'категорий')}` : `${c.tx} ${plural(c.tx, 'транзакция', 'транзакции', 'транзакций')}`;
     let badge = '';
@@ -286,7 +312,7 @@ function renderRows(t, vals, sc) {
       if (ci === 7) badge = `<span class="badge" style="background:#8E8E93;opacity:${o}">▼ ${Math.round(d)}%</span>`;
     }
     const hl = isF && fp > 0 ? `background:${mix('#F3F3F6', '#FFFFFF', fp)};box-shadow:0 0 0 ${3 * fp}px ${c.color}, 0 16px 40px rgba(0,0,0,${0.12 * fp});` : '';
-    out.push(`<div class="row" style="opacity:${clamp(p)};transform:translateY(${(1 - p) * 50}px);${hl}">
+    out.push(`<div class="row" style="opacity:${p};transform:translateY(${y}px);${hl}">
       <div class="ico" style="background:${c.color}">${svgIco(c.ico)}</div>
       <div class="rtxt"><div class="rname">${c.name}</div><div class="rsub">${txt}</div></div>
       <div class="ramt">-${fmt(vals[ci] / 100 * TOTAL)} <small>UZS</small></div>${badge}</div>`);
@@ -298,12 +324,12 @@ function renderRows(t, vals, sc) {
 // [x, y, scale, rotateY]
 const CAM = { hook: [0, 0, 1, 0], intro: [0, -20, 1.02, -4], A: [-20, 0, 1.0, 4], B: [20, 0, 1.0, -4], C: [0, -40, 1.03, 3], D: [-10, 0, 1.0, -3], outro: [0, 30, 0.94, 0] };
 function camAt(t) {
-  const sc = sceneAt(t), i = SCENES.indexOf(sc);
-  const prev = SCENES[Math.max(0, i - 1)];
-  const p = eQuint(prog(t, sc.t0 - 0.2, sc.t0 + 0.9));
-  const A = CAM[prev.id], B = CAM[sc.id];
-  const drift = (t - sc.t0) / Math.max(1, sc.t1 - sc.t0);
-  return A.map((v, k) => lerp(v, B[k], p) + (k === 2 ? drift * 0.015 : 0));
+  const out = CAM.hook.slice();
+  for (let i = 1; i < SCENES.length; i++) {
+    const A = CAM[SCENES[i - 1].id], B = CAM[SCENES[i].id], s = spring(t - (SCENES[i].t0 - 0.2));
+    for (let k = 0; k < 4; k++) out[k] += (B[k] - A[k]) * s;
+  }
+  return out;
 }
 
 // ---------------- main ----------------
@@ -312,17 +338,18 @@ window.renderFrame = function (t) {
   const lx = 30 + Math.sin(t * 0.25) * 25, ly = 12 + Math.cos(t * 0.2) * 6;
   $('light').style.background = `radial-gradient(1100px 900px at ${lx}% ${ly}%, rgba(214,46,94,.38), transparent 70%)`;
 
-  const rise = eExpo(prog(t, 0.2, 1.8));
+  const rise = spring(t - 0.2);
   const [cx, cy, cs, ry] = camAt(t);
-  const exit = eInOut(prog(t, 27.2, 28.0));
+  const exit = spring(t - 27.2);
   const float = Math.sin(t * 0.9) * 6;
   $('phone').style.transform = `perspective(2400px) translate(${cx}px, ${(1 - rise) * 1400 + cy + float + exit * 1500}px) scale(${cs}) rotateY(${ry}deg)`;
 
   const sc = sceneAt(t);
   const vals = valuesAt(t);
-  const reveal = eExpo(prog(t, 1.0, 2.6));
-  const fa = sc.focus >= 0 ? eOut(prog(t, sc.focusAt, sc.focusAt + 0.6)) * (1 - eInOut(prog(t, sc.t1 - 0.3, sc.t1))) : 0;
-  drawPie(vals, reveal, sc.focus, fa, t < 5.5 || t > 26.5);
+  const reveal = tw(t, 1.0, 1.6);
+  const pop = sc.focus >= 0 ? spring(t - sc.focusAt) - spring(t - (sc.t1 - 0.3)) : 0;
+  const fadeAmt = sc.focus >= 0 ? clamp(tw(t, sc.focusAt, 0.6) - tw(t, sc.t1 - 0.3, 0.3)) : 0;
+  drawPie(vals, reveal, sc.focus, pop, fadeAmt, t < 5.5 || t > 26.5);
   $('total').innerHTML = `−${fmt(TOTAL * reveal)}<small>.35 UZS</small>`;
   renderRows(t, vals, sc);
 
@@ -330,21 +357,20 @@ window.renderFrame = function (t) {
   const tp = prog(t, 3.95, 4.55), tap = $('tap');
   tap.style.display = tp > 0 && tp < 1 ? '' : 'none';
   tap.style.left = '560px'; tap.style.top = '440px';
-  tap.style.transform = `scale(${0.6 + eOut(tp) * 0.6})`;
+  tap.style.transform = `scale(${0.6 + spring(t - 3.95) * 0.6})`;
   tap.style.opacity = tp < 0.3 ? tp / 0.3 : 1 - (tp - 0.3) / 0.7;
 
   renderText(t);
 
   const lt = $('logoTop');
-  lt.style.opacity = eOut(prog(t, 0.1, 0.8)) * (1 - prog(t, 2.6, 3.0));
+  lt.style.opacity = tw(t, 0.1, 0.7) * (1 - tw(t, 2.6, 0.4));
   lt.style.display = t < 3.0 ? '' : 'none';
 
   const e = $('end');
   e.style.display = t >= 27.4 ? 'flex' : 'none';
   [['logoEnd', 27.5], ['endLine', 27.8], ['endSub', 28.0], ['endCta', 28.3]].forEach(([id, t0]) => {
-    const q = eExpo(prog(t, t0, t0 + 1.0));
-    $(id).style.opacity = clamp(q * 1.5);
-    $(id).style.transform = `translateY(${(1 - q) * 50}px)`;
+    $(id).style.opacity = tw(t, t0, 0.6);
+    $(id).style.transform = `translateY(${(1 - spring(t - t0)) * 50}px)`;
   });
 };
 window.renderFrame(0);
