@@ -4,7 +4,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const { spawn } = require('child_process');
 const path = require('path');
 
-const FPS = 30, DUR = 15;
+const FPS = 30, DUR = 30;
 
 (async () => {
   const browser = await chromium.launch();

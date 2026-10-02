@@ -3,7 +3,7 @@ import wave
 import numpy as np
 
 SR = 44100
-DUR = 15.0
+DUR = 30.0
 BPM = 120
 BEAT = 60 / BPM
 N = int(SR * DUR)
@@ -138,95 +138,91 @@ CH = {
     "G": [196.0, 246.94, 293.66],
 }
 ROOT = {"Am": A2 / 2, "F": F2 / 2, "C": C3 / 2, "G": G2 / 2}
-bars = ["Am", "Am", "F", "C", "G", "Am", "F", "C"]  # each bar = 2s
+CYCLE = ["Am", "F", "C", "G"]
 
 
 def chord_at(t):
-    return bars[min(int(t // 2), len(bars) - 1)]
+    return "Am" if t < 3.0 else CYCLE[int((t - 3.0) // 2) % 4]
 
 
 # ---------- arrangement ----------
-DROP = 2.0
-END_GROOVE = 15.0
+DROP = 3.0
+END_GROOVE = 30.0
+CUTS = [5.5, 10.0, 14.5, 20.5, 25.5]
+POPS = [0.2, 1.0, 3.05, 3.5, 3.8, 5.55, 6.5, 8.0, 10.05, 11.0, 14.55, 16.0, 17.0,
+        20.55, 21.5, 25.6, 26.0]
+ARP_ON = lambda t: (5.5 <= t < 10) or (17.0 <= t < 20.5) or (20.5 <= t < 27.5)
 
-# Hook build (0 - 2s)
+# Hook build (0 - 3s)
 add(boom() * 0.6, 0.0)
-add(pop(), 0.1)
-add(pop(), 0.85)
-add(riser(1.6), 0.4, 0.8)
-for i in range(16):  # 16th arp, rising volume
-    t0 = i * BEAT / 4 * 2  # 8ths for first half
-    if t0 >= DROP:
-        break
-    ch = CH["Am"]
-    add(arp_note(ch[i % 3] * 2), t0, 0.4 + 0.6 * t0 / DROP)
-for t0 in np.arange(1.0, DROP, BEAT / 4):  # snare roll
-    add(clap(), t0, 0.25 + 0.5 * (t0 - 1.0))
+add(riser(2.6), 0.4, 0.8)
+for i, t0 in enumerate(np.arange(0, DROP, BEAT / 2)):
+    add(arp_note(CH["Am"][i % 3] * 2), t0, 0.35 + 0.65 * t0 / DROP)
+for t0 in np.arange(2.0, DROP, BEAT / 4):
+    add(clap(), t0, 0.25 + 0.5 * (t0 - 2.0))
 for t0 in np.arange(0, DROP, BEAT):
     add(hat(), t0 + BEAT / 2, 0.6)
 
-# Drop / groove (2s - 15s)
-groove_start = int(DROP * SR)
-beats = np.arange(DROP, END_GROOVE - 1e-6, BEAT)
-for b in beats:
+# Groove
+for b in np.arange(DROP, END_GROOVE - 1e-6, BEAT):
     add(kick(), b, 0.95)
     if int(round((b - DROP) / BEAT)) % 2 == 1:
-        add(clap(), b, 0.75)
-    add(hat(open_=True), b + BEAT / 2, 0.45, pan=0.2)
+        add(clap(), b, 0.7)
+    add(hat(open_=True), b + BEAT / 2, 0.42, pan=0.2)
     for k in range(4):
-        add(hat(), b + k * BEAT / 4, 0.25 if k % 2 else 0.12, pan=-0.25)
-    # offbeat stabs
+        add(hat(), b + k * BEAT / 4, 0.22 if k % 2 else 0.1, pan=-0.25)
     cl, cr = pluck_chord(CH[chord_at(b)])
     i0 = int((b + BEAT / 2) * SR)
     n = min(len(cl), N - i0)
     if n > 0:
         L[i0:i0 + n] += cl[:n]
         R[i0:i0 + n] += cr[:n]
-    # 16th arp
     for k in range(4):
         tk = b + k * BEAT / 4
+        if not ARP_ON(tk):
+            continue
         ch = CH[chord_at(tk)]
         idx = int(round((tk - DROP) / (BEAT / 4)))
-        add(arp_note(ch[[0, 1, 2, 1][idx % 4]] * 4, 0.1), tk, 0.55, pan=0.3 if k % 2 else -0.3)
+        add(arp_note(ch[[0, 1, 2, 1][idx % 4]] * 4, 0.1), tk, 0.5, pan=0.3 if k % 2 else -0.3)
 
-# Bass: continuous saw, sidechained to kick
+# Bass, sidechained
 t_all = np.arange(N) / SR
 bass_f = np.array([ROOT[chord_at(x)] for x in t_all[::256]]).repeat(256)[:N]
 ph = 2 * np.pi * np.cumsum(bass_f) / SR
 bass = (np.sin(ph) * 0.7 + saw(1, ph / (2 * np.pi)) * 0.3 + np.sin(ph * 2) * 0.25)
 bass = onepole_lp(bass, 0.05)
 since_beat = (t_all - DROP) % BEAT
-duck = 1 - 0.95 * np.exp(-since_beat / 0.09)
-bass *= duck * (t_all >= DROP) * 0.55
+bass *= (1 - 0.95 * np.exp(-since_beat / 0.09)) * (t_all >= DROP) * 0.55
 L += bass
 R += bass
 
-# Big moments
+# Moments
 add(boom(), DROP, 0.9)
 add(crash(1.6), DROP, 0.9)
-for cut in [4.5, 7.0, 10.0, 12.5]:
+for cut in CUTS:
     add(whoosh(0.4), cut - 0.38, 0.8)
-    add(crash(1.0), cut, 0.55)
-for tp in [2.05, 2.5, 3.5, 4.55, 5.0, 7.05, 10.05, 10.5, 12.6, 12.9]:
-    add(pop(), tp, 0.7)
-add(riser(1.0), 8.0, 0.7)
-add(boom(), 9.0, 0.6)
-add(crash(1.0), 9.0, 0.5)
-
-# Stamp break: mute groove 10.75-11.0, then huge hit
-m0, m1 = int(10.75 * SR), int(11.0 * SR)
+    add(crash(1.0), cut, 0.5)
+for tp in POPS:
+    add(pop(), tp, 0.65)
+add(riser(1.5), 17.0, 0.7)
+add(boom(), 18.5, 0.6)
+add(crash(1.0), 18.5, 0.5)
+# stamp break
+m0, m1 = int(22.25 * SR), int(22.5 * SR)
 L[m0:m1] *= np.linspace(1, 0.05, m1 - m0)
 R[m0:m1] *= np.linspace(1, 0.05, m1 - m0)
-add(riser(0.25) * 1.5, 10.75)
-add(boom(), 11.0, 1.2)
-add(kick(0.6, big=2.0), 11.0, 1.0)
-add(crash(1.5), 11.0, 0.8)
-add(boom() * 0.5, 13.5)
-add(crash(1.2), 13.5, 0.5)
+add(riser(0.25) * 1.5, 22.25)
+add(boom(), 22.5, 1.2)
+add(kick(0.6, big=2.0), 22.5, 1.0)
+add(crash(1.5), 22.5, 0.8)
+# end card
+add(whoosh(0.5), 27.0, 0.9)
+add(boom(), 27.5, 1.0)
+add(crash(2.0), 27.5, 0.7)
 
 # Master
 fade = np.ones(N)
-f0 = int(14.55 * SR)
+f0 = int(28.8 * SR)
 fade[f0:] = np.linspace(1, 0, N - f0) ** 1.5
 mix = np.stack([L, R], axis=1) * fade[:, None]
 mix = np.tanh(mix * 1.3)
