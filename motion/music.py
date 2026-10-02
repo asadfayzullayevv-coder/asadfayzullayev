@@ -149,8 +149,7 @@ def chord_at(t):
 DROP = 3.0
 END_GROOVE = 30.0
 CUTS = [5.5, 10.0, 14.5, 20.5, 25.5]
-POPS = [0.2, 1.0, 3.05, 3.5, 3.8, 5.55, 6.5, 8.0, 10.05, 11.0, 14.55, 16.0, 17.0,
-        20.55, 21.5, 25.6, 26.0]
+POPS = []
 ARP_ON = lambda t: (5.5 <= t < 10) or (17.0 <= t < 20.5) or (20.5 <= t < 27.5)
 
 # Hook build (0 - 3s)
@@ -158,8 +157,8 @@ add(boom() * 0.6, 0.0)
 add(riser(2.6), 0.4, 0.8)
 for i, t0 in enumerate(np.arange(0, DROP, BEAT / 2)):
     add(arp_note(CH["Am"][i % 3] * 2), t0, 0.35 + 0.65 * t0 / DROP)
-for t0 in np.arange(2.0, DROP, BEAT / 4):
-    add(clap(), t0, 0.25 + 0.5 * (t0 - 2.0))
+for t0 in np.arange(2.0, DROP, BEAT / 2):
+    add(clap(), t0, 0.15 + 0.25 * (t0 - 2.0))
 for t0 in np.arange(0, DROP, BEAT):
     add(hat(), t0 + BEAT / 2, 0.6)
 
@@ -183,7 +182,7 @@ for b in np.arange(DROP, END_GROOVE - 1e-6, BEAT):
             continue
         ch = CH[chord_at(tk)]
         idx = int(round((tk - DROP) / (BEAT / 4)))
-        add(arp_note(ch[[0, 1, 2, 1][idx % 4]] * 4, 0.1), tk, 0.5, pan=0.3 if k % 2 else -0.3)
+        add(arp_note(ch[[0, 1, 2, 1][idx % 4]] * 4, 0.1), tk, 0.3, pan=0.3 if k % 2 else -0.3)
 
 # Bass, sidechained
 t_all = np.arange(N) / SR
@@ -197,35 +196,28 @@ L += bass
 R += bass
 
 # Moments
-add(boom(), DROP, 0.9)
-add(crash(1.6), DROP, 0.9)
+add(boom(), DROP, 0.5)
+add(crash(1.6), DROP, 0.6)
 for cut in CUTS:
-    add(whoosh(0.4), cut - 0.38, 0.8)
-    add(crash(1.0), cut, 0.5)
+    add(whoosh(0.5), cut - 0.45, 0.45)
+    add(crash(1.0), cut, 0.3)
 for tp in POPS:
     add(pop(), tp, 0.65)
-add(riser(1.5), 17.0, 0.7)
-add(boom(), 18.5, 0.6)
-add(crash(1.0), 18.5, 0.5)
+add(riser(1.5), 17.0, 0.4)
+add(crash(1.0), 18.5, 0.35)
 # stamp break
-m0, m1 = int(22.25 * SR), int(22.5 * SR)
-L[m0:m1] *= np.linspace(1, 0.05, m1 - m0)
-R[m0:m1] *= np.linspace(1, 0.05, m1 - m0)
-add(riser(0.25) * 1.5, 22.25)
-add(boom(), 22.5, 1.2)
-add(kick(0.6, big=2.0), 22.5, 1.0)
-add(crash(1.5), 22.5, 0.8)
+add(crash(1.2), 22.5, 0.3)
 # end card
-add(whoosh(0.5), 27.0, 0.9)
-add(boom(), 27.5, 1.0)
-add(crash(2.0), 27.5, 0.7)
+add(whoosh(0.6), 26.9, 0.5)
+add(boom(), 27.5, 0.5)
+add(crash(2.0), 27.5, 0.45)
 
 # Master
 fade = np.ones(N)
 f0 = int(28.8 * SR)
 fade[f0:] = np.linspace(1, 0, N - f0) ** 1.5
 mix = np.stack([L, R], axis=1) * fade[:, None]
-mix = np.tanh(mix * 1.3)
+mix = np.tanh(mix * 0.9)
 mix /= np.max(np.abs(mix)) + 1e-9
 mix *= 0.95
 pcm = (mix * 32767).astype(np.int16)

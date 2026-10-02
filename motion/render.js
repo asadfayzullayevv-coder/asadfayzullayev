@@ -11,6 +11,7 @@ const FPS = 30, DUR = 30;
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
   await page.goto('file://' + path.join(__dirname, 'index.html'));
   await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => window.logoReady);
   await page.waitForTimeout(300);
 
   const args = process.argv.slice(2);

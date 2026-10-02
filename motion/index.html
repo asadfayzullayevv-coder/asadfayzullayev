@@ -5,23 +5,20 @@
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #2A0010; }
-  body { font-family: 'Inter', 'Noto Color Emoji', sans-serif; color: #fff; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #3A0014; }
+  body { font-family: 'Inter', sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
   #stage { position: absolute; inset: 0; overflow: hidden; }
-  #bg { position: absolute; inset: -200px; }
-  .blob { position: absolute; border-radius: 50%; filter: blur(90px); }
-  #grid { position: absolute; inset: 0; opacity: .07;
-    background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px);
-    background-size: 90px 90px; }
+  #bg, #light, #vignette { position: absolute; inset: 0; }
+  #vignette { background: radial-gradient(1400px 1700px at 50% 45%, transparent 55%, rgba(20,0,6,.55) 100%); }
 
   /* phone */
-  #phone { position: absolute; left: 160px; top: 560px; width: 760px; height: 1560px;
-    border-radius: 96px; background: #111; padding: 16px; transform-origin: 50% 30%;
-    box-shadow: 0 40px 120px rgba(0,0,0,.55), 0 0 0 3px #2a2a30 inset; }
+  #phone { position: absolute; left: 160px; top: 600px; width: 760px; height: 1560px;
+    border-radius: 96px; background: #141416; padding: 16px; transform-origin: 50% 25%;
+    box-shadow: 0 60px 140px rgba(20,0,8,.6), 0 0 0 3px #2c2c30 inset; }
   #screen { position: relative; width: 100%; height: 100%; border-radius: 82px; overflow: hidden; background: #8e8e93; color: #111; }
   #status { position: absolute; top: 0; left: 0; right: 0; height: 100px; display: flex; align-items: center;
     justify-content: space-between; padding: 22px 56px 0 64px; font-weight: 700; font-size: 32px; color: #111; }
-  .sicons { display: flex; gap: 10px; align-items: center; }
+  .sicons { display: flex; gap: 12px; align-items: center; }
   .bars { display: flex; gap: 4px; align-items: flex-end; }
   .bars i { width: 6px; background: #111; border-radius: 2px; display: block; }
   .batt { width: 50px; height: 24px; border-radius: 7px; border: 2.5px solid #111; padding: 2px; }
@@ -36,52 +33,46 @@
   #pie { position: absolute; left: 50%; top: 140px; margin-left: -260px; width: 520px; height: 520px; }
   #rows { margin-top: 14px; }
   .row { display: flex; align-items: center; background: #F3F3F6; border-radius: 34px; height: 116px; padding: 0 30px 0 26px; margin-bottom: 10px; position: relative; }
-  .ico { width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 38px; flex: none; }
+  .ico { width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .ico svg { width: 40px; height: 40px; }
   .rtxt { margin-left: 22px; flex: 1; min-width: 0; }
   .rname { font-size: 29px; font-weight: 600; white-space: nowrap; }
   .rsub { font-size: 24px; color: #7c7c82; margin-top: 4px; }
   .ramt { font-size: 29px; font-weight: 600; white-space: nowrap; }
   .ramt small { font-size: 20px; color: #888; font-weight: 500; }
-  .badge { position: absolute; right: 30px; top: 12px; font-size: 20px; font-weight: 800; padding: 4px 12px; border-radius: 20px; color: #fff; }
+  .badge { position: absolute; right: 30px; top: 12px; font-size: 20px; font-weight: 700; padding: 4px 12px; border-radius: 20px; color: #fff; }
+  #tap { position: absolute; width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,.35); border: 3px solid rgba(255,255,255,.9); }
 
-  /* captions */
-  .cap { position: absolute; left: 40px; right: 40px; text-align: center; font-weight: 900; line-height: 1.08; letter-spacing: -1.5px;
-    text-shadow: 0 6px 30px rgba(0,0,0,.35); }
-  .w { display: inline-block; white-space: pre; will-change: transform; }
-  .hl { padding: 0 18px; border-radius: 20px; color: #7B0126; background: #fff; text-shadow: none; }
-  .pill { position: absolute; left: 50%; font-weight: 700; font-size: 40px; padding: 18px 34px; border-radius: 60px;
-    background: rgba(255,255,255,.14); border: 2px solid rgba(255,255,255,.22); white-space: nowrap; backdrop-filter: blur(6px); letter-spacing: -0.3px; }
-  .cta { background: #fff; color: #7B0126; font-size: 40px; box-shadow: 0 20px 60px rgba(0,0,0,.4); border: none; }
-  .seed { position: absolute; border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
-    background: radial-gradient(circle at 35% 30%, #fff 0 6%, #F2557E 14%, #C3134A 45%, #7B0126 80%); }
-  .sticker { position: absolute; width: 190px; height: 190px; border-radius: 50%; background: #fff; display: flex;
-    align-items: center; justify-content: center; font-size: 112px; box-shadow: 0 20px 50px rgba(40,0,10,.45); }
-  #end { position: absolute; inset: 0; background: radial-gradient(1300px 1100px at 50% 35%, #A3123F 0%, #7B0126 45%, #3A0014 100%);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  #endDonut { width: 300px; height: 300px; border-radius: 50%; position: relative;
-    background: conic-gradient(#2DB234 0 39.5%, #F57418 0 61%, #7B2FF7 0 79.8%, #EAAE00 0 95%, #E5332A 0 99.2%, #B98C93 0 100%);
-    -webkit-mask: radial-gradient(circle, transparent 0 41%, #000 42%); mask: radial-gradient(circle, transparent 0 41%, #000 42%); }
-  #endMark { font-size: 132px; font-weight: 900; letter-spacing: -5px; margin-top: 70px; }
-  #endLine { font-size: 52px; font-weight: 700; text-align: center; line-height: 1.15; margin-top: 30px; padding: 0 80px; letter-spacing: -1px; }
-  #endCta { margin-top: 70px; background: #fff; color: #7B0126; font-size: 42px; font-weight: 800; padding: 26px 50px; border-radius: 70px;
-    box-shadow: 0 24px 60px rgba(0,0,0,.35); }
-  #tap { position: absolute; width: 120px; height: 120px; border-radius: 50%; border: 8px solid #fff; pointer-events: none; }
-  #stamp { position: absolute; left: 50%; top: 1060px; font-size: 84px; font-weight: 900; color: #7B0126; border: 10px solid #7B0126;
-    border-radius: 26px; padding: 10px 34px; background: rgba(255,255,255,.92); letter-spacing: 1px; white-space: nowrap;
-    box-shadow: 0 30px 80px rgba(0,0,0,.45); }
-  .fx { position: absolute; pointer-events: none; }
-  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+  /* typography */
+  .blk { position: absolute; left: 84px; right: 84px; top: 120px; }
+  .eyebrow { font-size: 28px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase; color: #F4AFC2; display: flex; align-items: center; gap: 18px; }
+  .eyebrow::before { content: ''; width: 46px; height: 3px; background: #F4AFC2; display: block; }
+  .head { margin-top: 26px; font-size: 80px; font-weight: 800; letter-spacing: -2.5px; line-height: 1.04; }
+  .sub { margin-top: 22px; font-size: 40px; font-weight: 500; color: rgba(255,255,255,.72); letter-spacing: -0.5px; line-height: 1.2; }
+  .mask { overflow: hidden; padding-bottom: 6px; margin-bottom: -6px; }
+  .line { display: block; will-change: transform; }
+
+  /* logo */
+  .logo { display: flex; align-items: center; }
+  .logo img { display: block; height: 100%; }
+  .logo .word { font-weight: 800; letter-spacing: -2px; }
+  #logoTop { position: absolute; left: 84px; top: 90px; height: 52px; }
+  #logoTop .word { font-size: 46px; }
+
+  #end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #logoEnd { height: 150px; }
+  #logoEnd .word { font-size: 140px; letter-spacing: -6px; }
+  #endLine { font-size: 60px; font-weight: 800; text-align: center; letter-spacing: -2px; line-height: 1.08; margin-top: 70px; }
+  #endSub { font-size: 38px; font-weight: 500; color: rgba(255,255,255,.72); text-align: center; margin-top: 24px; line-height: 1.25; }
+  #endCta { margin-top: 70px; border: 2px solid rgba(255,255,255,.55); font-size: 34px; font-weight: 600; padding: 22px 44px; border-radius: 70px; letter-spacing: -0.3px; }
 </style>
 </head>
 <body>
 <div id="stage">
-  <div id="bg"><div class="blob" id="b1"></div><div class="blob" id="b2"></div><div class="blob" id="b3"></div></div>
-  <div id="grid"></div>
-  <div id="fxBack"></div>
+  <div id="bg"></div><div id="light"></div>
   <div id="phone"><div id="screen">
     <div id="status"><span>9:41</span><span class="sicons">
       <span class="bars"><i style="height:10px"></i><i style="height:15px"></i><i style="height:20px"></i><i style="height:25px"></i></span>
-      <span style="font-size:28px">&#x1F4F6;&#xFE0E;</span>
       <span class="batt"><b></b></span></span></div>
     <div id="sheet">
       <div id="handle"></div>
@@ -93,14 +84,16 @@
       </div>
       <div id="rows"></div>
     </div>
-  </div></div>
-  <div id="fxFront"></div>
+  </div><div id="tap"></div></div>
+  <div id="vignette"></div>
+  <div id="logoTop" class="logo"></div>
   <div id="caps"></div>
-  <div id="stamp">ПОДКАБЛУЧНИК 😅</div>
-  <div id="tap"></div>
-  <div id="end"><div id="endDonut"></div><div id="endMark">anorbank</div>
-    <div id="endLine">Узнай, что твои траты<br>говорят о тебе</div><div id="endCta">Расходы по категориям → «История»</div></div>
-  <div id="flash"></div>
+  <div id="end">
+    <div id="logoEnd" class="logo"></div>
+    <div id="endLine">Расходы<br>по категориям</div>
+    <div id="endSub">Узнай, что твои траты<br>говорят о тебе</div>
+    <div id="endCta">Приложение → История → Расходы</div>
+  </div>
 </div>
 
 <script>
@@ -109,27 +102,54 @@ const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const lerp = (a, b, p) => a + (b - a) * p;
 const prog = (t, a, b) => clamp((t - a) / (b - a));
 const eOut = p => 1 - Math.pow(1 - p, 3);
+const eExpo = p => p >= 1 ? 1 : 1 - Math.pow(2, -10 * p);
 const eInOut = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-const eBack = p => { const c = 2.2; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
-const spring = p => p >= 1 ? 1 : 1 - Math.exp(-6 * p) * Math.cos(11 * p);
+const eQuint = p => p < .5 ? 16 * p ** 5 : 1 - Math.pow(-2 * p + 2, 5) / 2;
 const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 const mix = (a, b, p) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], p))).join(',')})`; };
-const rand = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 const fmt = n => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const plural = (n, a, b, c) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? a : (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? b : c); };
+const $ = id => document.getElementById(id);
+
+// ---------------- logo: drop logo.svg (or logo.png) next to this file ----------------
+const logoReady = new Promise(resolve => {
+  const els = [$('logoTop'), $('logoEnd')];
+  const fallback = () => { els.forEach(el => el.innerHTML = '<span class="word">anorbank</span>'); resolve(false); };
+  const use = src => { els.forEach(el => { el.innerHTML = ''; const i = new Image(); i.src = src; el.appendChild(i); }); resolve(true); };
+  const svg = new Image();
+  svg.onload = () => use('logo.svg');
+  svg.onerror = () => { const png = new Image(); png.onload = () => use('logo.png'); png.onerror = fallback; png.src = 'logo.png'; };
+  svg.src = 'logo.svg';
+});
+window.logoReady = logoReady;
+
+// ---------------- icons (simple white glyphs like the app) ----------------
+const I = {
+  cart: '<path d="M6 9h28l-3 15H10L6 9zm6 0 4-6m12 6-4-6M14 15v4m6-4v4m6-4v4" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  food: '<path d="M12 4v32M8 4v10a4 4 0 0 0 8 0V4m12 32V4c-4 0-6 6-6 14h6" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  bag: '<path d="M8 13h24l-2 22H10L8 13zm6 0a6 6 0 0 1 12 0" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  home: '<path d="M5 19 20 6l15 13M10 15v18h20V15" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  heart: '<path d="M20 34S5 25 5 15a7.5 7.5 0 0 1 15-2 7.5 7.5 0 0 1 15 2c0 10-15 19-15 19z" fill="#fff"/>',
+  ticket: '<path d="M5 12h30v5a3 3 0 0 0 0 6v5H5v-5a3 3 0 0 0 0-6v-5zm19 0v16" stroke="#fff" stroke-width="3.2" fill="none" stroke-linejoin="round"/>',
+  smoke: '<path d="M8 30h22m-22 5h22M14 24c-3-4 3-6 0-10s3-6 0-9m8 19c-3-4 3-6 0-10s3-6 0-9" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/>',
+  sport: '<path d="M4 20h32M9 13v14m-4-10v6m26-10v14m4-10v6" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round"/>',
+  love: '<path d="M20 33S6 25 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 9-14 17-14 17z" fill="#fff"/>',
+  folder: '<path d="M5 11h11l3 4h16v18H5V11z" stroke="#fff" stroke-width="3.2" fill="none" stroke-linejoin="round"/>',
+};
+const svgIco = k => `<svg viewBox="0 0 40 40">${I[k]}</svg>`;
 
 // ---------------- data ----------------
 const CATS = [
-  { name: 'Продукты', color: '#2DB234', ico: '🛒', tx: 20 },
-  { name: 'Еда и рестораны', color: '#F57418', ico: '🍔', tx: 16 },
-  { name: 'Маркетплейсы', color: '#7B2FF7', ico: '🛍️', tx: 6 },
-  { name: 'Дом', color: '#EAAE00', ico: '🏠', tx: 6 },
-  { name: 'Здоровье', color: '#E5332A', ico: '💊', tx: 6 },
-  { name: 'Развлечения', color: '#2F6BFF', ico: '🎉', tx: 24 },
-  { name: 'Кальян', color: '#56627A', ico: '💨', tx: 18 },
-  { name: 'Спорт', color: '#00B8D9', ico: '🏋️', tx: 1 },
-  { name: 'Любимая', color: '#FF2D78', ico: '❤️', tx: 31 },
-  { name: 'Остальные', color: '#B98C93', ico: '📁', tx: 5 },
+  { name: 'Продукты', color: '#2DB234', ico: 'cart', tx: 20 },
+  { name: 'Еда и рестораны', color: '#F57418', ico: 'food', tx: 16 },
+  { name: 'Маркетплейсы', color: '#7B2FF7', ico: 'bag', tx: 6 },
+  { name: 'Дом', color: '#EAAE00', ico: 'home', tx: 6 },
+  { name: 'Здоровье', color: '#E5332A', ico: 'heart', tx: 6 },
+  { name: 'Развлечения', color: '#2F6BFF', ico: 'ticket', tx: 24 },
+  { name: 'Кальян', color: '#56627A', ico: 'smoke', tx: 18 },
+  { name: 'Спорт', color: '#00B8D9', ico: 'sport', tx: 1 },
+  { name: 'Любимая', color: '#E8336E', ico: 'love', tx: 31 },
+  { name: 'Остальные', color: '#9C7178', ico: 'folder', tx: 5 },
 ];
 const TOTAL = 12549000;
 //            Прод  Еда  Марк  Дом  Здор Разв Кал  Спорт Люб  Ост
@@ -140,8 +160,8 @@ const C1 = [25, 15, 12, 10, 4, 0, 8, 22, 0, 4];
 const C2 = [18, 12, 9, 8, 3, 0, 47, 1, 0, 2];
 const SD = [14, 12, 9, 6, 2, 0, 0, 0, 56, 1];
 const KEYS = [
-  [0, S0], [5.5, S0], [6.1, SA], [10, SA], [10.6, SB], [14.5, SB], [15.0, C1], [15.6, C1],
-  [18.0, C2], [20.5, C2], [22.0, SD], [25.5, SD], [26.3, S0], [30, S0],
+  [0, S0], [5.5, S0], [6.3, SA], [10, SA], [10.8, SB], [14.5, SB], [15.3, C1], [15.8, C1],
+  [18.3, C2], [20.5, C2], [22.0, SD], [25.5, SD], [26.5, S0], [30, S0],
 ];
 function valuesAt(t) {
   for (let i = 0; i < KEYS.length - 1; i++) {
@@ -153,109 +173,62 @@ function valuesAt(t) {
 
 const SCENES = [
   { id: 'hook', t0: 0, t1: 3.0, rows: [0, 1, 2, 3], focus: -1 },
-  { id: 'intro', t0: 3.0, t1: 5.5, rows: [0, 1, 2, 3], focus: 0, focusAt: 4.0 },
-  { id: 'A', t0: 5.5, t1: 10.0, rows: [5, 1, 2, 0], focus: 5, focusAt: 6.0 },
-  { id: 'B', t0: 10.0, t1: 14.5, rows: [0, 3, 4, 1], focus: 0, focusAt: 10.5 },
-  { id: 'C', t0: 14.5, t1: 20.5, rows: [6, 7, 0, 1], focus: 6, focusAt: 15.6 },
-  { id: 'D', t0: 20.5, t1: 25.5, rows: [8, 0, 1, 2], focus: 8, focusAt: 21.0 },
+  { id: 'intro', t0: 3.0, t1: 5.5, rows: [0, 1, 2, 3], focus: 0, focusAt: 4.1 },
+  { id: 'A', t0: 5.5, t1: 10.0, rows: [5, 1, 2, 0], focus: 5, focusAt: 6.2 },
+  { id: 'B', t0: 10.0, t1: 14.5, rows: [0, 3, 4, 1], focus: 0, focusAt: 10.7 },
+  { id: 'C', t0: 14.5, t1: 20.5, rows: [6, 7, 0, 1], focus: 6, focusAt: 15.8 },
+  { id: 'D', t0: 20.5, t1: 25.5, rows: [8, 0, 1, 2], focus: 8, focusAt: 21.3 },
   { id: 'outro', t0: 25.5, t1: 99, rows: [0, 1, 2, 3], focus: -1 },
 ];
-const CUTS = [3.0, 5.5, 10.0, 14.5, 20.5, 25.5];
 const sceneAt = t => SCENES.find(s => t >= s.t0 && t < s.t1) || SCENES[SCENES.length - 1];
 
-// ---------------- captions ----------------
-// kind: 'big' | 'pill' | 'cta'. *word* = highlighted
-const CAPS = [
-  { k: 'big', text: 'Покажи свои траты —', t0: 0.2, t1: 3.0, y: 150, size: 80 },
-  { k: 'big', text: 'скажу, *кто ты* 👀', t0: 1.0, t1: 3.0, y: 262, size: 104 },
-
-  { k: 'pill', text: 'Расходы по категориям 📊', t0: 3.05, t1: 5.5, y: 92 },
-  { k: 'big', text: 'Каждый цвет —', t0: 3.5, t1: 5.5, y: 215, size: 88 },
-  { k: 'big', text: '*своя* категория', t0: 3.8, t1: 5.5, y: 320, size: 88 },
-
-  { k: 'pill', text: 'Много «Развлечений»? 🎉', t0: 5.55, t1: 10.0, y: 92 },
-  { k: 'big', text: 'Ты *любишь жить*', t0: 6.5, t1: 8.0, y: 230, size: 108 },
-  { k: 'big', text: '…но пора *работать* над собой 💪', t0: 8.0, t1: 10.0, y: 200, size: 88 },
-
-  { k: 'pill', text: 'Больше всего — «Продукты»? 🛒', t0: 10.05, t1: 14.5, y: 92 },
-  { k: 'big', text: 'Ты *семейный* человек 🏡', t0: 11.0, t1: 14.5, y: 210, size: 100 },
-
-  { k: 'pill', text: 'Своя категория — «Кальян» 💨', t0: 14.55, t1: 17.0, y: 92 },
-  { k: 'big', text: '«Кальян» *+39%*', t0: 16.0, t1: 18.5, y: 230, size: 104 },
-  { k: 'pill', text: '«Кальян» растёт 📈  «Спорт» исчезает 📉', t0: 17.0, t1: 20.5, y: 92 },
-  { k: 'big', text: 'Может, пора заняться *спортом?* 🏋️', t0: 18.5, t1: 20.5, y: 200, size: 88 },
-
-  { k: 'pill', text: '«Любимая» — 56% бюджета ❤️', t0: 20.55, t1: 25.5, y: 92 },
-  { k: 'big', text: 'Поздравляем, ты…', t0: 21.5, t1: 25.5, y: 240, size: 100 },
-
-  { k: 'big', text: 'А что скажут', t0: 25.6, t1: 27.5, y: 160, size: 96 },
-  { k: 'big', text: '*твои* траты? 👀', t0: 26.0, t1: 27.5, y: 272, size: 108 },
+// ---------------- text blocks ----------------
+// parts: [kind, text (\n = new line), reveal time]
+const BLOCKS = [
+  { t0: 0.5, t1: 3.0, top: 200, parts: [['eyebrow', 'Расходы', 0.5], ['head', 'Скажи, на что\nты тратишь —', 0.65], ['sub', 'и мы скажем, кто ты.', 1.5]] },
+  { t0: 3.1, t1: 5.5, parts: [['eyebrow', 'Новое в приложении', 3.1], ['head', 'Расходы\nпо категориям', 3.2], ['sub', 'Каждый цвет — отдельная категория.', 3.8]] },
+  { t0: 5.6, t1: 10.0, parts: [['eyebrow', '01 · Развлечения 52%', 5.6], ['head', 'Ты любишь жить.', 6.2], ['sub', 'Но, может, пора\nпоработать над собой?', 7.8]] },
+  { t0: 10.1, t1: 14.5, parts: [['eyebrow', '02 · Продукты 61%', 10.1], ['head', 'Ты — семейный\nчеловек.', 10.7], ['sub', 'Дом, семья и полный холодильник.', 12.0]] },
+  { t0: 14.6, t1: 18.3, parts: [['eyebrow', '03 · Своя категория', 14.6], ['head', 'Кальян растёт.\nСпорт исчезает.', 15.4]] },
+  { t0: 18.5, t1: 20.5, parts: [['eyebrow', 'Кальян +39% · Спорт −21%', 18.5], ['head', 'Может, пора\nзаняться спортом?', 18.6]] },
+  { t0: 20.6, t1: 25.5, parts: [['eyebrow', '04 · Любимая 56%', 20.6], ['head', 'Больше половины\nбюджета — на неё.', 21.2], ['sub', 'Поздравляем, ты подкаблучник.', 22.6]] },
+  { t0: 25.6, t1: 27.6, parts: [['head', 'А что скажут\nтвои траты?', 25.7]] },
 ];
-const capsEl = document.getElementById('caps');
-CAPS.forEach((c, ci) => {
-  const el = document.createElement('div');
-  c.el = el;
-  if (c.k === 'big') {
-    el.className = 'cap';
-    el.style.top = c.y + 'px';
-    el.style.fontSize = c.size + 'px';
-    const parts = c.text.split(/(\*[^*]+\*)/).filter(Boolean);
-    c.words = [];
-    parts.forEach(p => {
-      const hl = p.startsWith('*');
-      const txt = hl ? p.slice(1, -1) : p;
-      if (hl) {
-        const s = document.createElement('span');
-        s.className = 'w hl';
-                s.textContent = txt;
-        el.appendChild(s); c.words.push(s);
-      } else {
-        txt.split(/(\s+)/).forEach(w => {
-          if (!w) return;
-          if (/^\s+$/.test(w)) { el.appendChild(document.createTextNode(' ')); return; }
-          const s = document.createElement('span'); s.className = 'w'; s.textContent = w;
-          el.appendChild(s); c.words.push(s);
-        });
-      }
+const capsEl = $('caps');
+BLOCKS.forEach(b => {
+  const el = document.createElement('div'); el.className = 'blk'; b.el = el; b.lines = [];
+  if (b.top) el.style.top = b.top + 'px';
+  b.parts.forEach(([kind, text, at]) => {
+    const p = document.createElement('div'); p.className = kind;
+    text.split('\n').forEach((ln, i) => {
+      const m = document.createElement('div'); m.className = 'mask';
+      const l = document.createElement('span'); l.className = 'line'; l.textContent = ln;
+      m.appendChild(l); p.appendChild(m);
+      b.lines.push({ el: l, at: at + i * 0.09, kind });
     });
-  } else {
-    el.className = 'pill' + (c.k === 'cta' ? ' cta' : '');
-    el.style.top = c.y + 'px';
-    el.textContent = c.text;
-  }
+    el.appendChild(p);
+  });
   capsEl.appendChild(el);
 });
-
-function renderCaps(t) {
-  for (const c of CAPS) {
-    const vis = t >= c.t0 && t < c.t1;
-    c.el.style.display = vis ? '' : 'none';
-    if (!vis) continue;
-    const out = prog(t, c.t1 - 0.12, c.t1); // exit
-    if (c.k === 'big') {
-      c.words.forEach((w, i) => {
-        const p = prog(t, c.t0 + i * 0.055, c.t0 + i * 0.055 + 0.32);
-        const s = lerp(1.9, 1, eBack(p)) * (1 - 0.3 * out);
-        const blur = (1 - p) * 14;
-        const rot = w.classList.contains('hl') ? -2.5 : 0;
-        w.style.opacity = clamp(p * 3) * (1 - out);
-        w.style.transform = `translateY(${(1 - eOut(p)) * 40}px) scale(${s}) rotate(${rot}deg)`;
-        w.style.filter = blur > .3 ? `blur(${blur}px)` : 'none';
-      });
-    } else {
-      const p = prog(t, c.t0, c.t0 + 0.35);
-      const dy = c.k === 'cta' ? (1 - spring(p)) * 140 : (1 - spring(p)) * -120;
-      const pulse = c.k === 'cta' ? 1 + 0.04 * Math.max(0, Math.sin((t - c.t0) * Math.PI * 4)) : 1;
-      c.el.style.opacity = clamp(p * 2.5) * (1 - out);
-      c.el.style.transform = `translateX(-50%) translateY(${dy}px) scale(${pulse * (1 - 0.2 * out)})`;
-    }
-  }
+function renderText(t) {
+  BLOCKS.forEach(b => {
+    const vis = t >= b.t0 - 0.01 && t < b.t1;
+    b.el.style.display = vis ? '' : 'none';
+    if (!vis) return;
+    const out = eInOut(prog(t, b.t1 - 0.35, b.t1));
+    b.el.style.opacity = 1 - out;
+    b.el.style.transform = `translateY(${-30 * out}px)`;
+    b.lines.forEach(l => {
+      const p = eExpo(prog(t, l.at, l.at + 0.9));
+      l.el.style.transform = `translateY(${(1 - p) * 110}%)`;
+      l.el.style.opacity = l.kind === 'eyebrow' ? clamp(p * 2) : 1;
+    });
+  });
 }
 
 // ---------------- pie ----------------
-const pie = document.getElementById('pie');
-const ctx = pie.getContext('2d');
-function drawPie(vals, reveal, focus, focusAmt, t) {
+const ctx = $('pie').getContext('2d');
+function drawPie(vals, reveal, focus, focusAmt, dec) {
   ctx.clearRect(0, 0, 520, 520);
   const cx = 260, cy = 260, RO = 222, RI = 98, GAP = 7;
   const total = vals.reduce((a, b) => a + b, 0);
@@ -266,16 +239,13 @@ function drawPie(vals, reveal, focus, focusAmt, t) {
     const span = v / total * Math.PI * 2 * reveal;
     const a0 = a, a1 = a + span; a += span;
     const isF = i === focus;
-    const pop = isF ? 26 * focusAmt : 0;
-    const ro = RO + pop, ri = RI;
-    const rmid = (ro + ri) / 2;
+    const ro = RO + (isF ? 24 * focusAmt : 0), ri = RI;
     if (span * ri < GAP + 1.5) return;
     let rr = clamp((span * ri - GAP) / 2, 0.5, 18);
     rr = Math.min(rr, (ro - ri) / 2 - 1);
     const roI = ro - rr, riI = ri + rr;
     const insO = (GAP / 2 + rr) / roI;
     const insI = Math.min((GAP / 2 + rr) / riI, span / 2 - 0.0001);
-    ctx.save();
     const fade = (isF || focus < 0) ? 0 : clamp(0.62 * focusAmt);
     const col = fade > 0 ? mix(CATS[i].color, '#F3F3F6', fade) : CATS[i].color;
     ctx.beginPath();
@@ -285,220 +255,97 @@ function drawPie(vals, reveal, focus, focusAmt, t) {
     ctx.fillStyle = col; ctx.strokeStyle = col;
     ctx.lineWidth = rr * 2; ctx.lineJoin = 'round';
     ctx.fill(); ctx.stroke();
-    ctx.restore();
-    const am = (a0 + a1) / 2;
-    if (span > 0.26) labels.push({ x: cx + Math.cos(am) * rmid, y: cy + Math.sin(am) * rmid, v, i, isF });
+    const am = (a0 + a1) / 2, rmid = (ro + ri) / 2;
+    if (span > 0.26) labels.push({ x: cx + Math.cos(am) * rmid, y: cy + Math.sin(am) * rmid, v, isF });
   });
   labels.forEach(l => {
     ctx.save();
     ctx.globalAlpha = (l.isF || focus < 0) ? 1 : 1 - 0.5 * focusAmt;
-    const big = l.isF ? 1 + 0.35 * focusAmt : 1;
-    ctx.font = `700 ${Math.round(32 * big)}px Inter`;
+    ctx.font = `700 ${Math.round(31 * (l.isF ? 1 + 0.3 * focusAmt : 1))}px Inter`;
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const txt = l.v < 1 ? '<1%' : (Math.abs(l.v - Math.round(l.v)) > 0.05 && Math.abs(l.v * 10 - Math.round(l.v * 10)) < 0.01 ? l.v.toFixed(1) : Math.round(l.v)) + '%';
-    ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 6;
+    const r10 = Math.round(l.v * 10) / 10;
+    const txt = l.v < 1 ? '<1%' : (dec && r10 % 1 ? r10.toFixed(1) : Math.round(l.v)) + '%';
     ctx.fillText(txt, l.x, l.y);
     ctx.restore();
   });
 }
 
 // ---------------- rows ----------------
-const rowsEl = document.getElementById('rows');
 function renderRows(t, vals, sc) {
   const out = [];
   sc.rows.forEach((ci, k) => {
     const c = CATS[ci];
-    const p = eBack(prog(t, sc.t0 + 0.08 + k * 0.06, sc.t0 + 0.45 + k * 0.06));
-    const amt = vals[ci] / 100 * TOTAL;
-    const isF = ci === sc.focus && t >= (sc.focusAt || 0);
-    let txt = ci === 9 ? `${c.tx} ${plural(c.tx, 'категория', 'категории', 'категорий')}` : `${c.tx} ${plural(c.tx, 'транзакция', 'транзакции', 'транзакций')}`;
+    const p = eExpo(prog(t, sc.t0 + 0.1 + k * 0.07, sc.t0 + 0.9 + k * 0.07));
+    const fp = sc.focusAt ? eOut(prog(t, sc.focusAt, sc.focusAt + 0.5)) * (1 - prog(t, sc.t1 - 0.3, sc.t1)) : 0;
+    const isF = ci === sc.focus;
+    const txt = ci === 9 ? `${c.tx} ${plural(c.tx, 'категория', 'категории', 'категорий')}` : `${c.tx} ${plural(c.tx, 'транзакция', 'транзакции', 'транзакций')}`;
     let badge = '';
-    if (sc.id === 'C' && t > 15.9) {
-      const d = vals[ci] - C1[ci];
-      if (ci === 6) badge = `<span class="badge" style="background:#FF3B30">▲ +${Math.round(d)}%</span>`;
-      if (ci === 7) badge = `<span class="badge" style="background:#8E8E93">▼ ${Math.round(d)}%</span>`;
+    if (sc.id === 'C' && t > 16.0) {
+      const d = vals[ci] - C1[ci], o = prog(t, 16.0, 16.4);
+      if (ci === 6) badge = `<span class="badge" style="background:#D92D20;opacity:${o}">▲ +${Math.round(d)}%</span>`;
+      if (ci === 7) badge = `<span class="badge" style="background:#8E8E93;opacity:${o}">▼ ${Math.round(d)}%</span>`;
     }
-    const glow = isF ? `box-shadow:0 0 0 4px ${c.color}, 0 12px 30px ${c.color}55; background:#fff;` : '';
-    out.push(`<div class="row" style="opacity:${clamp(p)};transform:translateY(${(1 - p) * 60}px);${glow}">
-      <div class="ico" style="background:${c.color}">${c.ico}</div>
+    const hl = isF && fp > 0 ? `background:${mix('#F3F3F6', '#FFFFFF', fp)};box-shadow:0 0 0 ${3 * fp}px ${c.color}, 0 16px 40px rgba(0,0,0,${0.12 * fp});` : '';
+    out.push(`<div class="row" style="opacity:${clamp(p)};transform:translateY(${(1 - p) * 50}px);${hl}">
+      <div class="ico" style="background:${c.color}">${svgIco(c.ico)}</div>
       <div class="rtxt"><div class="rname">${c.name}</div><div class="rsub">${txt}</div></div>
-      <div class="ramt">-${fmt(amt)} <small>UZS</small></div>${badge}</div>`);
+      <div class="ramt">-${fmt(vals[ci] / 100 * TOTAL)} <small>UZS</small></div>${badge}</div>`);
   });
-  rowsEl.innerHTML = out.join('');
+  $('rows').innerHTML = out.join('');
 }
 
-// ---------------- fx particles ----------------
-const fxFront = document.getElementById('fxFront');
-const fxBack = document.getElementById('fxBack');
-const SEEDS = Array.from({ length: 22 }, (_, i) => ({
-  x: rand(i + 1) * 1080, y: rand(i + 2) * 1920, s: 30 + rand(i + 3) * 90, z: 0.3 + rand(i + 4) * 0.9,
-  r: rand(i + 5) * 360, sp: 0.4 + rand(i + 6),
-}));
-function seedHTML(x, y, s, r, o, blur) {
-  return `<div class="seed" style="left:${x - s / 2}px;top:${y - s / 2}px;width:${s}px;height:${s * 1.15}px;transform:rotate(${r}deg);opacity:${o};${blur ? `filter:blur(${blur}px)` : ''}"></div>`;
-}
-function particles(t) {
-  let front = '', back = '';
-  // drifting pomegranate seeds (brand motif)
-  SEEDS.forEach((d, i) => {
-    const y = ((d.y - t * 60 * d.z * d.sp) % 2100 + 2100) % 2100 - 90;
-    const x = d.x + Math.sin(t * 0.8 * d.sp + i) * 40;
-    back += seedHTML(x, y, d.s * d.z, d.r + t * 30 * d.sp, 0.55 * d.z, d.z < 0.6 ? 6 : 0);
-  });
-  // seed burst on every cut
-  CUTS.concat([22.5]).forEach((c, ci) => {
-    const dt = t - c; if (dt < 0 || dt > 0.9) return;
-    for (let i = 0; i < 16; i++) {
-      const ang = i / 16 * Math.PI * 2 + ci, sp = 900 + rand(i + ci * 20) * 900;
-      const x = 540 + Math.cos(ang) * sp * eOut(dt / 0.9) * 0.9, y = 1000 + Math.sin(ang) * sp * eOut(dt / 0.9) * 0.9;
-      back += seedHTML(x, y, 50 + rand(i + 7) * 50, ang * 57, 1 - dt / 0.9, 0);
-    }
-  });
-  // A: confetti in brand palette
-  if (t >= 6.45 && t < 10.0) {
-    const dt = t - 6.45;
-    for (let i = 0; i < 60; i++) {
-      const ang = rand(i) * Math.PI * 2, sp = 600 + rand(i + 9) * 1100;
-      const x = 540 + Math.cos(ang) * sp * dt, y = 520 + Math.sin(ang) * sp * dt * 0.8 + 900 * dt * dt;
-      const col = ['#fff', '#F2557E', '#C3134A', '#FFD1DC', '#fff', '#E5B04A'][i % 6];
-      const r = dt * 720 * (rand(i + 3) - .5) * 2;
-      back += `<div class="fx" style="left:${x}px;top:${y}px;width:18px;height:30px;background:${col};border-radius:4px;transform:rotate(${r}deg);opacity:${1 - prog(dt, 1.4, 2)}"></div>`;
-    }
-  }
-  // C: smoke
-  if (t >= 15.0 && t < 20.5) {
-    for (let i = 0; i < 22; i++) {
-      const life = 1.8, st = 15.0 + rand(i + 40) * 4.0;
-      const p = (t - st) / life; if (p < 0 || p > 1) continue;
-      const x = 100 + rand(i + 50) * 880 + Math.sin(p * 4 + i) * 60, y = 1500 - p * 1300;
-      const s = 120 + p * 380;
-      back += `<div class="fx" style="left:${x - s / 2}px;top:${y - s / 2}px;width:${s}px;height:${s}px;border-radius:50%;background:radial-gradient(rgba(240,225,230,.5),rgba(240,225,230,0) 70%);opacity:${Math.sin(p * Math.PI) * 0.8}"></div>`;
-    }
-  }
-  // D: hearts
-  if (t >= 20.5 && t < 25.6) {
-    for (let i = 0; i < 40; i++) {
-      const life = 2.0, st = 20.5 + rand(i + 70) * 4.4;
-      const p = (t - st) / life; if (p < 0 || p > 1) continue;
-      const x = 40 + rand(i + 80) * 1000 + Math.sin(p * 6 + i) * 40, y = 1950 - p * 1700;
-      const sz = 50 + rand(i + 90) * 70;
-      const h = `<div class="fx" style="left:${x}px;top:${y}px;font-size:${sz}px;opacity:${Math.sin(p * Math.PI)};transform:rotate(${Math.sin(p * 5 + i) * 20}deg)">❤️</div>`;
-      if (i % 2) front += h; else back += h;
-    }
-  }
-  // stickers: white badges, same style in every scene
-  const stickers = [
-    { e: '🎉', t0: 6.5, t1: 10.0, x: 850, y: 590, r: 12 },
-    { e: '🪩', t0: 6.7, t1: 10.0, x: 40, y: 820, r: -10 },
-    { e: '🏡', t0: 11.15, t1: 14.5, x: 850, y: 600, r: 10 },
-    { e: '🧸', t0: 11.3, t1: 14.5, x: 40, y: 850, r: -10 },
-    { e: '💨', t0: 15.6, t1: 20.5, x: 850, y: 620, r: 8 },
-    { e: '🏋️', t0: 18.65, t1: 20.5, x: 40, y: 850, r: -12 },
-    { e: '💍', t0: 22.65, t1: 25.5, x: 860, y: 640, r: 12 },
-    { e: '🫣', t0: 22.75, t1: 25.5, x: 40, y: 870, r: -10 },
-  ];
-  stickers.forEach(s => {
-    if (t < s.t0 || t >= s.t1) return;
-    const p = spring(prog(t, s.t0, s.t0 + 0.5));
-    const out = prog(t, s.t1 - 0.12, s.t1);
-    const wob = Math.sin((t - s.t0) * 5) * 5;
-    front += `<div class="sticker" style="left:${s.x}px;top:${s.y}px;transform:scale(${p * (1 - out)}) rotate(${s.r + wob}deg)">${s.e}</div>`;
-  });
-  fxFront.innerHTML = front;
-  fxBack.innerHTML = back;
+// ---------------- camera per scene ----------------
+// [x, y, scale, rotateY]
+const CAM = { hook: [0, 0, 1, 0], intro: [0, -20, 1.02, -4], A: [-20, 0, 1.0, 4], B: [20, 0, 1.0, -4], C: [0, -40, 1.03, 3], D: [-10, 0, 1.0, -3], outro: [0, 30, 0.94, 0] };
+function camAt(t) {
+  const sc = sceneAt(t), i = SCENES.indexOf(sc);
+  const prev = SCENES[Math.max(0, i - 1)];
+  const p = eQuint(prog(t, sc.t0 - 0.2, sc.t0 + 0.9));
+  const A = CAM[prev.id], B = CAM[sc.id];
+  const drift = (t - sc.t0) / Math.max(1, sc.t1 - sc.t0);
+  return A.map((v, k) => lerp(v, B[k], p) + (k === 2 ? drift * 0.015 : 0));
 }
 
-// ---------------- main render ----------------
-const $ = id => document.getElementById(id);
-function decay(t, t0, d) { return t < t0 ? 0 : Math.exp(-(t - t0) / d); }
-
+// ---------------- main ----------------
 window.renderFrame = function (t) {
+  $('bg').style.background = 'linear-gradient(170deg, #8A0A31 0%, #7B0126 35%, #4E0019 75%, #33000F 100%)';
+  const lx = 30 + Math.sin(t * 0.25) * 25, ly = 12 + Math.cos(t * 0.2) * 6;
+  $('light').style.background = `radial-gradient(1100px 900px at ${lx}% ${ly}%, rgba(214,46,94,.38), transparent 70%)`;
+
+  const rise = eExpo(prog(t, 0.2, 1.8));
+  const [cx, cy, cs, ry] = camAt(t);
+  const exit = eInOut(prog(t, 27.2, 28.0));
+  const float = Math.sin(t * 0.9) * 6;
+  $('phone').style.transform = `perspective(2400px) translate(${cx}px, ${(1 - rise) * 1400 + cy + float + exit * 1500}px) scale(${cs}) rotateY(${ry}deg)`;
+
   const sc = sceneAt(t);
-  // brand background: deep pomegranate, slowly breathing light
-  const bl = 0.5 + 0.5 * Math.sin(t * 0.9);
-  $('bg').style.background = `radial-gradient(1300px 1000px at ${50 + Math.sin(t * 0.4) * 12}% ${8 + bl * 6}%, #B0164A 0%, #7B0126 38%, transparent 75%), linear-gradient(#4A0019, #22000B)`;
-  const b = [[$('b1'), '#C3134A', 640, 300, 0], [$('b2'), '#7B0126', 700, 1500, 2], [$('b3'), '#F2557E', 380, 900, 4]];
-  b.forEach(([el, c, s, y, ph]) => {
-    el.style.width = el.style.height = s + 'px';
-    el.style.background = c; el.style.opacity = c === '#F2557E' ? 0.28 : 0.6;
-    el.style.left = (540 + Math.sin(t * 0.6 + ph) * 380 - s / 2 + 200) + 'px';
-    el.style.top = (y + Math.cos(t * 0.5 + ph) * 160 + 200) + 'px';
-  });
-  $('grid').style.transform = `translateY(${(t * 45) % 90}px)`;
-
-  // beat & cut energy
-  let beatPulse = 0;
-  if (t >= 3.0 && t < 27.5) { const bt = (t - 3.0) % 0.5; beatPulse = Math.exp(-bt / 0.11); }
-  let punch = 0, dir = 1;
-  CUTS.forEach((c, i) => { const d = decay(t, c, 0.16); if (d > punch) { punch = d; dir = i % 2 ? -1 : 1; } });
-  // stamp shake
-  const sh = decay(t, 22.5, 0.18) * (t >= 22.5 ? 1 : 0);
-  const shx = (rand(Math.floor(t * 60)) - .5) * 60 * sh, shy = (rand(Math.floor(t * 60) + 1) - .5) * 60 * sh;
-  $('stage').style.transform = `translate(${shx}px, ${shy}px)`;
-
-  // phone
-  const rise = spring(prog(t, 0.4, 1.5));
-  let py = (1 - rise) * 1300;
-  let ps = 1 + beatPulse * 0.01 + punch * 0.06;
-  let prot = punch * 2.2 * dir;
-  let px = punch * 70 * dir;
-  const oz = eInOut(prog(t, 25.5, 26.3));
-  ps *= lerp(1, 0.9, oz); py += lerp(0, -40, oz);
-  prot += Math.sin(t * 1.3) * 0.6;
-  $('phone').style.transform = `translate(${px}px, ${py}px) scale(${ps}) rotate(${prot}deg)`;
-  $('phone').style.filter = punch > 0.35 ? `blur(${(punch - 0.35) * 10}px)` : 'none';
-
-  // app content
   const vals = valuesAt(t);
-  const reveal = eOut(prog(t, 1.0, 2.4));
-  const fa = sc.focus >= 0 ? eBack(prog(t, sc.focusAt, sc.focusAt + 0.35)) * (1 - prog(t, sc.t1 - 0.15, sc.t1)) : 0;
-  drawPie(vals, reveal, sc.focus, fa, t);
-  const tot = TOTAL * eOut(prog(t, 1.0, 2.4));
-  $('total').innerHTML = `−${fmt(tot)}<small>.35 UZS</small>`;
+  const reveal = eExpo(prog(t, 1.0, 2.6));
+  const fa = sc.focus >= 0 ? eOut(prog(t, sc.focusAt, sc.focusAt + 0.6)) * (1 - eInOut(prog(t, sc.t1 - 0.3, sc.t1))) : 0;
+  drawPie(vals, reveal, sc.focus, fa, t < 5.5 || t > 26.5);
+  $('total').innerHTML = `−${fmt(TOTAL * reveal)}<small>.35 UZS</small>`;
   renderRows(t, vals, sc);
 
-  // stamp
-  const st = $('stamp');
-  if (t >= 22.5 && t < 25.5) {
-    const p = prog(t, 22.5, 22.68);
-    const s = lerp(3.2, 1, eOut(p)) * (1 - 0.3 * prog(t, 25.38, 25.5));
-    st.style.display = '';
-    st.style.opacity = clamp(p * 3) * (1 - prog(t, 25.38, 25.5));
-    st.style.transform = `translateX(-50%) rotate(-11deg) scale(${s + Math.sin((t - 22.5) * 10) * 0.015})`;
-  } else st.style.display = 'none';
+  // touch indicator on the green segment
+  const tp = prog(t, 3.95, 4.55), tap = $('tap');
+  tap.style.display = tp > 0 && tp < 1 ? '' : 'none';
+  tap.style.left = '560px'; tap.style.top = '440px';
+  tap.style.transform = `scale(${0.6 + eOut(tp) * 0.6})`;
+  tap.style.opacity = tp < 0.3 ? tp / 0.3 : 1 - (tp - 0.3) / 0.7;
 
-  renderCaps(t);
-  particles(t);
+  renderText(t);
 
-  // flash
-  let fl = 0; CUTS.forEach(c => fl = Math.max(fl, decay(t, c, 0.07)));
-  fl = Math.max(fl, decay(t, 22.5, 0.08) * 0.8, decay(t, 27.5, 0.1));
-  $('flash').style.opacity = fl * 0.5;
+  const lt = $('logoTop');
+  lt.style.opacity = eOut(prog(t, 0.1, 0.8)) * (1 - prog(t, 2.6, 3.0));
+  lt.style.display = t < 3.0 ? '' : 'none';
 
-  // tap on the green segment (intro)
-  const tp = prog(t, 3.85, 4.5);
-  const tap = $('tap');
-  if (tp > 0 && tp < 1) {
-    tap.style.display = '';
-    tap.style.left = (800 - 60) + 'px'; tap.style.top = (1150 - 60) + 'px';
-    tap.style.transform = `translate(${px}px, ${py}px) scale(${0.4 + tp * 1.4})`;
-    tap.style.opacity = 1 - tp;
-  } else tap.style.display = 'none';
-
-  // end card
-  const ec = $('end'), ep = prog(t, 27.5, 27.95);
-  if (t >= 27.5) {
-    ec.style.display = 'flex';
-    ec.style.clipPath = `circle(${eOut(ep) * 1500}px at 50% 55%)`;
-    $('endDonut').style.transform = `rotate(${(t - 27.5) * 120 - 90}deg) scale(${spring(prog(t, 27.6, 28.3))})`;
-    const items = [['endMark', 27.75], ['endLine', 28.0], ['endCta', 28.35]];
-    items.forEach(([id, t0]) => {
-      const q = prog(t, t0, t0 + 0.45);
-      const el = $(id);
-      el.style.opacity = clamp(q * 2.5);
-      el.style.transform = `translateY(${(1 - spring(q)) * 80}px) scale(${id === 'endCta' ? 1 + 0.03 * Math.max(0, Math.sin((t - 28.35) * Math.PI * 2)) : 1})`;
-    });
-  } else ec.style.display = 'none';
+  const e = $('end');
+  e.style.display = t >= 27.4 ? 'flex' : 'none';
+  [['logoEnd', 27.5], ['endLine', 27.8], ['endSub', 28.0], ['endCta', 28.3]].forEach(([id, t0]) => {
+    const q = eExpo(prog(t, t0, t0 + 1.0));
+    $(id).style.opacity = clamp(q * 1.5);
+    $(id).style.transform = `translateY(${(1 - q) * 50}px)`;
+  });
 };
 window.renderFrame(0);
 </script>
