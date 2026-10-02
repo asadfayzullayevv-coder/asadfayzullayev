@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0B0B12; }
+  body { font-family: 'Inter', 'Noto Color Emoji', sans-serif; color: #fff; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  #bg { position: absolute; inset: -200px; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(90px); }
+  #grid { position: absolute; inset: 0; opacity: .07;
+    background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px);
+    background-size: 90px 90px; }
+
+  /* phone */
+  #phone { position: absolute; left: 160px; top: 560px; width: 760px; height: 1560px;
+    border-radius: 96px; background: #111; padding: 16px; transform-origin: 50% 30%;
+    box-shadow: 0 40px 120px rgba(0,0,0,.55), 0 0 0 3px #2a2a30 inset; }
+  #screen { position: relative; width: 100%; height: 100%; border-radius: 82px; overflow: hidden; background: #8e8e93; color: #111; }
+  #status { position: absolute; top: 0; left: 0; right: 0; height: 100px; display: flex; align-items: center;
+    justify-content: space-between; padding: 22px 56px 0 64px; font-weight: 700; font-size: 32px; color: #111; }
+  .sicons { display: flex; gap: 10px; align-items: center; }
+  .bars { display: flex; gap: 4px; align-items: flex-end; }
+  .bars i { width: 6px; background: #111; border-radius: 2px; display: block; }
+  .batt { width: 50px; height: 24px; border-radius: 7px; border: 2.5px solid #111; padding: 2px; }
+  .batt b { display: block; width: 100%; height: 100%; background: #111; border-radius: 3px; }
+  #sheet { position: absolute; top: 100px; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 40px 40px 0 0; padding: 0 30px; }
+  #handle { width: 84px; height: 7px; border-radius: 4px; background: #d9d9de; margin: 16px auto 0; }
+  #title { font-size: 44px; font-weight: 800; margin: 34px 0 0 10px; letter-spacing: -0.5px; }
+  #card { margin-top: 26px; background: #F3F3F6; border-radius: 40px; height: 660px; position: relative; }
+  #cardlbl { position: absolute; top: 30px; width: 100%; text-align: center; font-size: 26px; color: #8a8a90; font-weight: 500; }
+  #total { position: absolute; top: 66px; width: 100%; text-align: center; font-size: 50px; font-weight: 700; letter-spacing: -1px; }
+  #total small { font-size: 24px; color: #555; font-weight: 500; letter-spacing: 0; }
+  #pie { position: absolute; left: 50%; top: 140px; margin-left: -260px; width: 520px; height: 520px; }
+  #rows { margin-top: 14px; }
+  .row { display: flex; align-items: center; background: #F3F3F6; border-radius: 34px; height: 116px; padding: 0 30px 0 26px; margin-bottom: 10px; position: relative; }
+  .ico { width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 38px; flex: none; }
+  .rtxt { margin-left: 22px; flex: 1; min-width: 0; }
+  .rname { font-size: 29px; font-weight: 600; white-space: nowrap; }
+  .rsub { font-size: 24px; color: #7c7c82; margin-top: 4px; }
+  .ramt { font-size: 29px; font-weight: 600; white-space: nowrap; }
+  .ramt small { font-size: 20px; color: #888; font-weight: 500; }
+  .badge { position: absolute; right: 30px; top: 12px; font-size: 20px; font-weight: 800; padding: 4px 12px; border-radius: 20px; color: #fff; }
+
+  /* captions */
+  .cap { position: absolute; left: 40px; right: 40px; text-align: center; font-weight: 900; line-height: 1.08; letter-spacing: -1.5px;
+    text-shadow: 0 6px 30px rgba(0,0,0,.35); }
+  .w { display: inline-block; white-space: pre; will-change: transform; }
+  .hl { padding: 0 16px; border-radius: 18px; color: #fff; }
+  .pill { position: absolute; left: 50%; font-weight: 700; font-size: 40px; padding: 18px 34px; border-radius: 60px;
+    background: rgba(255,255,255,.14); border: 2px solid rgba(255,255,255,.22); white-space: nowrap; backdrop-filter: blur(6px); letter-spacing: -0.3px; }
+  .cta { background: #fff; color: #111; font-size: 38px; box-shadow: 0 20px 60px rgba(0,0,0,.4); border: none; }
+  #stamp { position: absolute; left: 50%; top: 1060px; font-size: 84px; font-weight: 900; color: #FF2D55; border: 10px solid #FF2D55;
+    border-radius: 26px; padding: 10px 34px; background: rgba(255,255,255,.92); letter-spacing: 1px; white-space: nowrap;
+    box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  .fx { position: absolute; pointer-events: none; }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"><div class="blob" id="b1"></div><div class="blob" id="b2"></div><div class="blob" id="b3"></div></div>
+  <div id="grid"></div>
+  <div id="fxBack"></div>
+  <div id="phone"><div id="screen">
+    <div id="status"><span>9:41</span><span class="sicons">
+      <span class="bars"><i style="height:10px"></i><i style="height:15px"></i><i style="height:20px"></i><i style="height:25px"></i></span>
+      <span style="font-size:28px">&#x1F4F6;&#xFE0E;</span>
+      <span class="batt"><b></b></span></span></div>
+    <div id="sheet">
+      <div id="handle"></div>
+      <div id="title">Расходы</div>
+      <div id="card">
+        <div id="cardlbl">Итог за этот месяц</div>
+        <div id="total"></div>
+        <canvas id="pie" width="520" height="520"></canvas>
+      </div>
+      <div id="rows"></div>
+    </div>
+  </div></div>
+  <div id="fxFront"></div>
+  <div id="caps"></div>
+  <div id="stamp">ПОДКАБЛУЧНИК 😅</div>
+  <div id="flash"></div>
+</div>
+
+<script>
+// ---------------- helpers ----------------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const eOut = p => 1 - Math.pow(1 - p, 3);
+const eInOut = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const eBack = p => { const c = 2.2; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+const spring = p => p >= 1 ? 1 : 1 - Math.exp(-6 * p) * Math.cos(11 * p);
+const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const mix = (a, b, p) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], p))).join(',')})`; };
+const rand = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const fmt = n => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const plural = (n, a, b, c) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? a : (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? b : c); };
+
+// ---------------- data ----------------
+const CATS = [
+  { name: 'Продукты', color: '#2DB234', ico: '🛒', tx: 20 },
+  { name: 'Еда и рестораны', color: '#F57418', ico: '🍔', tx: 16 },
+  { name: 'Маркетплейсы', color: '#7B2FF7', ico: '🛍️', tx: 6 },
+  { name: 'Дом', color: '#EAAE00', ico: '🏠', tx: 6 },
+  { name: 'Здоровье', color: '#E5332A', ico: '💊', tx: 6 },
+  { name: 'Развлечения', color: '#2F6BFF', ico: '🎉', tx: 24 },
+  { name: 'Кальян', color: '#56627A', ico: '💨', tx: 18 },
+  { name: 'Спорт', color: '#00B8D9', ico: '🏋️', tx: 1 },
+  { name: 'Любимая', color: '#FF2D78', ico: '❤️', tx: 31 },
+  { name: 'Остальные', color: '#B98C93', ico: '📁', tx: 5 },
+];
+const TOTAL = 12549000;
+//            Прод  Еда  Марк  Дом  Здор Разв Кал  Спорт Люб  Ост
+const S0 = [39.5, 21.5, 18.8, 15.2, 4.2, 0, 0, 0, 0, 0.8];
+const SA = [10, 16, 12, 8, 2, 52, 0, 0, 0, 0];
+const SB = [61, 8, 6, 15, 7, 0, 0, 0, 0, 3];
+const C1 = [25, 15, 12, 10, 4, 0, 8, 22, 0, 4];
+const C2 = [18, 12, 9, 8, 3, 0, 47, 1, 0, 2];
+const SD = [14, 12, 9, 6, 2, 0, 0, 0, 56, 1];
+const KEYS = [
+  [0, S0], [2.0, S0], [2.4, SA], [4.5, SA], [4.9, SB], [7.0, SB], [7.4, C1], [7.6, C1],
+  [8.8, C2], [10.0, C2], [10.9, SD], [12.5, SD], [13.1, S0], [15, S0],
+];
+function valuesAt(t) {
+  for (let i = 0; i < KEYS.length - 1; i++) {
+    const [ta, va] = KEYS[i], [tb, vb] = KEYS[i + 1];
+    if (t <= tb) { const p = eInOut(prog(t, ta, tb)); return va.map((v, j) => lerp(v, vb[j], p)); }
+  }
+  return KEYS[KEYS.length - 1][1];
+}
+
+const SCENES = [
+  { id: 'hook', t0: 0, t1: 2.0, accent: '#7B2FF7', accent2: '#FF2D78', rows: [0, 1, 2, 3], focus: -1 },
+  { id: 'A', t0: 2.0, t1: 4.5, accent: '#2F6BFF', accent2: '#00B8D9', rows: [5, 1, 2, 0], focus: 5, focusAt: 2.3 },
+  { id: 'B', t0: 4.5, t1: 7.0, accent: '#2DB234', accent2: '#EAAE00', rows: [0, 3, 4, 1], focus: 0, focusAt: 4.8 },
+  { id: 'C', t0: 7.0, t1: 10.0, accent: '#56627A', accent2: '#00B8D9', rows: [6, 7, 0, 1], focus: 6, focusAt: 7.6 },
+  { id: 'D', t0: 10.0, t1: 12.5, accent: '#FF2D78', accent2: '#FF7AA8', rows: [8, 0, 1, 2], focus: 8, focusAt: 10.3 },
+  { id: 'outro', t0: 12.5, t1: 99, accent: '#7B2FF7', accent2: '#2DB234', rows: [0, 1, 2, 3], focus: -1 },
+];
+const CUTS = [2.0, 4.5, 7.0, 10.0, 12.5];
+const sceneAt = t => SCENES.find(s => t >= s.t0 && t < s.t1) || SCENES[SCENES.length - 1];
+
+// ---------------- captions ----------------
+// kind: 'big' | 'pill' | 'cta'. *word* = highlighted
+const CAPS = [
+  { k: 'big', text: 'Покажи свои траты —', t0: 0.1, t1: 2.0, y: 150, size: 80 },
+  { k: 'big', text: 'скажу, *кто ты* 👀', t0: 0.85, t1: 2.0, y: 262, size: 104, hl: '#FF2D78' },
+
+  { k: 'pill', text: 'Много «Развлечений»? 🎉', t0: 2.05, t1: 4.5, y: 92 },
+  { k: 'big', text: 'Ты *любишь жить*', t0: 2.5, t1: 3.5, y: 230, size: 108, hl: '#2F6BFF' },
+  { k: 'big', text: '…но пора *работать* над собой 💪', t0: 3.5, t1: 4.5, y: 200, size: 88, hl: '#2F6BFF' },
+
+  { k: 'pill', text: 'Больше всего — «Продукты»? 🛒', t0: 4.55, t1: 7.0, y: 92 },
+  { k: 'big', text: 'Ты *семейный* человек 🏡', t0: 5.0, t1: 7.0, y: 210, size: 100, hl: '#2DB234' },
+
+  { k: 'pill', text: '«Кальян» растёт 📈  «Спорт» исчезает 📉', t0: 7.05, t1: 10.0, y: 92 },
+  { k: 'big', text: 'Может, пора заняться *спортом?* 🏋️', t0: 8.9, t1: 10.0, y: 200, size: 88, hl: '#00B8D9' },
+
+  { k: 'pill', text: '«Любимая» — 56% бюджета ❤️', t0: 10.05, t1: 12.5, y: 92 },
+  { k: 'big', text: 'Поздравляем, ты…', t0: 10.5, t1: 12.5, y: 240, size: 100 },
+
+  { k: 'big', text: 'А что скажут', t0: 12.6, t1: 15.1, y: 160, size: 96 },
+  { k: 'big', text: '*твои* траты? 👀', t0: 12.9, t1: 15.1, y: 272, size: 108, hl: '#7B2FF7' },
+  { k: 'cta', text: 'Расходы по категориям → «История»', t0: 13.5, t1: 15.1, y: 1690 },
+];
+const capsEl = document.getElementById('caps');
+CAPS.forEach((c, ci) => {
+  const el = document.createElement('div');
+  c.el = el;
+  if (c.k === 'big') {
+    el.className = 'cap';
+    el.style.top = c.y + 'px';
+    el.style.fontSize = c.size + 'px';
+    const parts = c.text.split(/(\*[^*]+\*)/).filter(Boolean);
+    c.words = [];
+    parts.forEach(p => {
+      const hl = p.startsWith('*');
+      const txt = hl ? p.slice(1, -1) : p;
+      if (hl) {
+        const s = document.createElement('span');
+        s.className = 'w hl';
+        s.style.background = c.hl;
+        s.textContent = txt;
+        el.appendChild(s); c.words.push(s);
+      } else {
+        txt.split(/(\s+)/).forEach(w => {
+          if (!w) return;
+          if (/^\s+$/.test(w)) { el.appendChild(document.createTextNode(' ')); return; }
+          const s = document.createElement('span'); s.className = 'w'; s.textContent = w;
+          el.appendChild(s); c.words.push(s);
+        });
+      }
+    });
+  } else {
+    el.className = 'pill' + (c.k === 'cta' ? ' cta' : '');
+    el.style.top = c.y + 'px';
+    el.textContent = c.text;
+  }
+  capsEl.appendChild(el);
+});
+
+function renderCaps(t) {
+  for (const c of CAPS) {
+    const vis = t >= c.t0 && t < c.t1;
+    c.el.style.display = vis ? '' : 'none';
+    if (!vis) continue;
+    const out = prog(t, c.t1 - 0.12, c.t1); // exit
+    if (c.k === 'big') {
+      c.words.forEach((w, i) => {
+        const p = prog(t, c.t0 + i * 0.055, c.t0 + i * 0.055 + 0.32);
+        const s = lerp(1.9, 1, eBack(p)) * (1 - 0.3 * out);
+        const blur = (1 - p) * 14;
+        const rot = w.classList.contains('hl') ? -2.5 : 0;
+        w.style.opacity = clamp(p * 3) * (1 - out);
+        w.style.transform = `translateY(${(1 - eOut(p)) * 40}px) scale(${s}) rotate(${rot}deg)`;
+        w.style.filter = blur > .3 ? `blur(${blur}px)` : 'none';
+      });
+    } else {
+      const p = prog(t, c.t0, c.t0 + 0.35);
+      const dy = c.k === 'cta' ? (1 - spring(p)) * 140 : (1 - spring(p)) * -120;
+      const pulse = c.k === 'cta' ? 1 + 0.04 * Math.max(0, Math.sin((t - c.t0) * Math.PI * 4)) : 1;
+      c.el.style.opacity = clamp(p * 2.5) * (1 - out);
+      c.el.style.transform = `translateX(-50%) translateY(${dy}px) scale(${pulse * (1 - 0.2 * out)})`;
+    }
+  }
+}
+
+// ---------------- pie ----------------
+const pie = document.getElementById('pie');
+const ctx = pie.getContext('2d');
+function drawPie(vals, reveal, focus, focusAmt, t) {
+  ctx.clearRect(0, 0, 520, 520);
+  const cx = 260, cy = 260, RO = 222, RI = 98, GAP = 7;
+  const total = vals.reduce((a, b) => a + b, 0);
+  let a = -Math.PI / 2;
+  const labels = [];
+  vals.forEach((v, i) => {
+    if (v <= 0.05) return;
+    const span = v / total * Math.PI * 2 * reveal;
+    const a0 = a, a1 = a + span; a += span;
+    const isF = i === focus;
+    const pop = isF ? 26 * focusAmt : 0;
+    const ro = RO + pop, ri = RI;
+    const rmid = (ro + ri) / 2;
+    if (span * ri < GAP + 1.5) return;
+    let rr = clamp((span * ri - GAP) / 2, 0.5, 18);
+    rr = Math.min(rr, (ro - ri) / 2 - 1);
+    const roI = ro - rr, riI = ri + rr;
+    const insO = (GAP / 2 + rr) / roI;
+    const insI = Math.min((GAP / 2 + rr) / riI, span / 2 - 0.0001);
+    ctx.save();
+    const fade = (isF || focus < 0) ? 0 : clamp(0.62 * focusAmt);
+    const col = fade > 0 ? mix(CATS[i].color, '#F3F3F6', fade) : CATS[i].color;
+    ctx.beginPath();
+    ctx.arc(cx, cy, roI, a0 + insO, Math.max(a0 + insO, a1 - insO));
+    ctx.arc(cx, cy, riI, a1 - insI, a0 + insI, true);
+    ctx.closePath();
+    ctx.fillStyle = col; ctx.strokeStyle = col;
+    ctx.lineWidth = rr * 2; ctx.lineJoin = 'round';
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+    const am = (a0 + a1) / 2;
+    if (span > 0.26) labels.push({ x: cx + Math.cos(am) * rmid, y: cy + Math.sin(am) * rmid, v, i, isF });
+  });
+  labels.forEach(l => {
+    ctx.save();
+    ctx.globalAlpha = (l.isF || focus < 0) ? 1 : 1 - 0.5 * focusAmt;
+    const big = l.isF ? 1 + 0.35 * focusAmt : 1;
+    ctx.font = `700 ${Math.round(32 * big)}px Inter`;
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const txt = l.v < 1 ? '<1%' : (Math.abs(l.v - Math.round(l.v)) > 0.05 && Math.abs(l.v * 10 - Math.round(l.v * 10)) < 0.01 ? l.v.toFixed(1) : Math.round(l.v)) + '%';
+    ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 6;
+    ctx.fillText(txt, l.x, l.y);
+    ctx.restore();
+  });
+}
+
+// ---------------- rows ----------------
+const rowsEl = document.getElementById('rows');
+function renderRows(t, vals, sc) {
+  const out = [];
+  sc.rows.forEach((ci, k) => {
+    const c = CATS[ci];
+    const p = eBack(prog(t, sc.t0 + 0.08 + k * 0.06, sc.t0 + 0.45 + k * 0.06));
+    const amt = vals[ci] / 100 * TOTAL;
+    const isF = ci === sc.focus && t >= (sc.focusAt || 0);
+    let txt = ci === 9 ? `${c.tx} ${plural(c.tx, 'категория', 'категории', 'категорий')}` : `${c.tx} ${plural(c.tx, 'транзакция', 'транзакции', 'транзакций')}`;
+    let badge = '';
+    if (sc.id === 'C' && t > 7.8) {
+      const d = vals[ci] - C1[ci];
+      if (ci === 6) badge = `<span class="badge" style="background:#FF3B30">▲ +${Math.round(d)}%</span>`;
+      if (ci === 7) badge = `<span class="badge" style="background:#8E8E93">▼ ${Math.round(d)}%</span>`;
+    }
+    const glow = isF ? `box-shadow:0 0 0 4px ${c.color}, 0 12px 30px ${c.color}55; background:#fff;` : '';
+    out.push(`<div class="row" style="opacity:${clamp(p)};transform:translateY(${(1 - p) * 60}px);${glow}">
+      <div class="ico" style="background:${c.color}">${c.ico}</div>
+      <div class="rtxt"><div class="rname">${c.name}</div><div class="rsub">${txt}</div></div>
+      <div class="ramt">-${fmt(amt)} <small>UZS</small></div>${badge}</div>`);
+  });
+  rowsEl.innerHTML = out.join('');
+}
+
+// ---------------- fx particles ----------------
+const fxFront = document.getElementById('fxFront');
+const fxBack = document.getElementById('fxBack');
+function particles(t) {
+  let front = '', back = '';
+  // A: confetti burst at 2.5
+  if (t >= 2.45 && t < 4.5) {
+    const dt = t - 2.45;
+    for (let i = 0; i < 60; i++) {
+      const ang = rand(i) * Math.PI * 2, sp = 600 + rand(i + 9) * 1100;
+      const x = 540 + Math.cos(ang) * sp * dt, y = 520 + Math.sin(ang) * sp * dt * 0.8 + 900 * dt * dt;
+      const col = ['#2F6BFF', '#FF2D78', '#EAAE00', '#2DB234', '#00B8D9', '#fff'][i % 6];
+      const r = dt * 720 * (rand(i + 3) - .5) * 2;
+      back += `<div class="fx" style="left:${x}px;top:${y}px;width:18px;height:30px;background:${col};border-radius:4px;transform:rotate(${r}deg);opacity:${1 - prog(dt, 1.4, 2)}"></div>`;
+    }
+  }
+  // B & stickers handled below; C: smoke puffs
+  if (t >= 7.4 && t < 10.0) {
+    for (let i = 0; i < 14; i++) {
+      const life = 1.6, st = 7.4 + rand(i + 40) * 2.2;
+      const p = (t - st) / life; if (p < 0 || p > 1) continue;
+      const x = 100 + rand(i + 50) * 880 + Math.sin(p * 4 + i) * 60, y = 1500 - p * 1300;
+      const s = 120 + p * 380;
+      back += `<div class="fx" style="left:${x - s / 2}px;top:${y - s / 2}px;width:${s}px;height:${s}px;border-radius:50%;background:radial-gradient(rgba(220,225,235,.55),rgba(220,225,235,0) 70%);opacity:${Math.sin(p * Math.PI) * 0.8}"></div>`;
+    }
+  }
+  // D: hearts
+  if (t >= 10.0 && t < 12.6) {
+    for (let i = 0; i < 26; i++) {
+      const life = 1.8, st = 10.0 + rand(i + 70) * 2.2;
+      const p = (t - st) / life; if (p < 0 || p > 1) continue;
+      const x = 40 + rand(i + 80) * 1000 + Math.sin(p * 6 + i) * 40, y = 1950 - p * 1700;
+      const s = 50 + rand(i + 90) * 70;
+      const h = `<div class="fx" style="left:${x}px;top:${y}px;font-size:${s}px;opacity:${Math.sin(p * Math.PI)};transform:rotate(${Math.sin(p * 5 + i) * 20}deg)">❤️</div>`;
+      if (i % 2) front += h; else back += h;
+    }
+  }
+  // emoji stickers (pop with spring)
+  const stickers = [
+    { e: '🎉', t0: 2.5, t1: 4.5, x: 880, y: 600, s: 150, r: 14 },
+    { e: '🪩', t0: 2.65, t1: 4.5, x: 60, y: 820, s: 120, r: -12 },
+    { e: '🏡', t0: 5.15, t1: 7.0, x: 860, y: 610, s: 150, r: 10 },
+    { e: '🧸', t0: 5.3, t1: 7.0, x: 40, y: 860, s: 130, r: -10 },
+    { e: '💨', t0: 7.7, t1: 10.0, x: 860, y: 640, s: 140, r: 8 },
+    { e: '🏋️', t0: 9.05, t1: 10.0, x: 40, y: 860, s: 150, r: -12 },
+    { e: '💍', t0: 11.15, t1: 12.5, x: 870, y: 650, s: 130, r: 12 },
+    { e: '🫣', t0: 11.25, t1: 12.5, x: 50, y: 880, s: 130, r: -10 },
+  ];
+  stickers.forEach(s => {
+    if (t < s.t0 || t >= s.t1) return;
+    const p = spring(prog(t, s.t0, s.t0 + 0.5));
+    const out = prog(t, s.t1 - 0.12, s.t1);
+    const wob = Math.sin((t - s.t0) * 7) * 5;
+    front += `<div class="fx" style="left:${s.x}px;top:${s.y}px;font-size:${s.s}px;transform:scale(${p * (1 - out)}) rotate(${s.r + wob}deg);filter:drop-shadow(0 14px 24px rgba(0,0,0,.35))">${s.e}</div>`;
+  });
+  fxFront.innerHTML = front;
+  fxBack.innerHTML = back;
+}
+
+// ---------------- main render ----------------
+const $ = id => document.getElementById(id);
+function decay(t, t0, d) { return t < t0 ? 0 : Math.exp(-(t - t0) / d); }
+
+window.renderFrame = function (t) {
+  const sc = sceneAt(t);
+  const prev = SCENES[Math.max(0, SCENES.indexOf(sc) - 1)];
+  const cp = eOut(prog(t, sc.t0, sc.t0 + 0.35));
+  const acc = mix(prev.accent, sc.accent, cp), acc2 = mix(prev.accent2, sc.accent2, cp);
+
+  // background
+  $('bg').style.background = `radial-gradient(1200px 900px at 50% 0%, ${acc} 0%, transparent 60%), #0B0B12`;
+  const b = [[$('b1'), acc, 700, 300, 0], [$('b2'), acc2, 600, 1500, 2], [$('b3'), acc, 500, 900, 4]];
+  b.forEach(([el, c, s, y, ph]) => {
+    el.style.width = el.style.height = s + 'px';
+    el.style.background = c; el.style.opacity = 0.55;
+    el.style.left = (540 + Math.sin(t * 0.9 + ph) * 380 - s / 2 + 200) + 'px';
+    el.style.top = (y + Math.cos(t * 0.7 + ph) * 160 + 200) + 'px';
+  });
+  $('grid').style.transform = `translateY(${(t * 90) % 90}px)`;
+
+  // beat & cut energy
+  let beatPulse = 0;
+  if (t >= 2.0 && t < 14.6) { const bt = (t - 2.0) % 0.5; beatPulse = Math.exp(-bt / 0.11); }
+  let punch = 0, dir = 1;
+  CUTS.forEach((c, i) => { const d = decay(t, c, 0.16); if (d > punch) { punch = d; dir = i % 2 ? -1 : 1; } });
+  // stamp shake
+  const sh = decay(t, 11.0, 0.18) * (t >= 11.0 ? 1 : 0);
+  const shx = (rand(Math.floor(t * 60)) - .5) * 60 * sh, shy = (rand(Math.floor(t * 60) + 1) - .5) * 60 * sh;
+  $('stage').style.transform = `translate(${shx}px, ${shy}px)`;
+
+  // phone
+  const rise = spring(prog(t, 0.3, 1.25));
+  let py = (1 - rise) * 1300;
+  let ps = 1 + beatPulse * 0.012 + punch * 0.07;
+  let prot = punch * 2.2 * dir;
+  let px = punch * 70 * dir;
+  const oz = eInOut(prog(t, 12.5, 13.3));
+  ps *= lerp(1, 0.9, oz); py += lerp(0, -40, oz);
+  prot += Math.sin(t * 1.3) * 0.6;
+  $('phone').style.transform = `translate(${px}px, ${py}px) scale(${ps}) rotate(${prot}deg)`;
+  $('phone').style.filter = punch > 0.35 ? `blur(${(punch - 0.35) * 10}px)` : 'none';
+
+  // app content
+  const vals = valuesAt(t);
+  const reveal = eOut(prog(t, 0.75, 1.75));
+  const fa = sc.focus >= 0 ? eBack(prog(t, sc.focusAt, sc.focusAt + 0.35)) * (1 - prog(t, sc.t1 - 0.15, sc.t1)) : 0;
+  drawPie(vals, reveal, sc.focus, fa, t);
+  const tot = TOTAL * eOut(prog(t, 0.7, 1.7));
+  $('total').innerHTML = `−${fmt(tot)}<small>.35 UZS</small>`;
+  renderRows(t, vals, sc);
+
+  // stamp
+  const st = $('stamp');
+  if (t >= 11.0 && t < 12.5) {
+    const p = prog(t, 11.0, 11.18);
+    const s = lerp(3.2, 1, eOut(p)) * (1 - 0.3 * prog(t, 12.38, 12.5));
+    st.style.display = '';
+    st.style.opacity = clamp(p * 3) * (1 - prog(t, 12.38, 12.5));
+    st.style.transform = `translateX(-50%) rotate(-11deg) scale(${s + Math.sin((t - 11) * 10) * 0.015})`;
+  } else st.style.display = 'none';
+
+  renderCaps(t);
+  particles(t);
+
+  // flash
+  let fl = 0; CUTS.forEach(c => fl = Math.max(fl, decay(t, c, 0.07)));
+  fl = Math.max(fl, decay(t, 11.0, 0.08) * 0.8);
+  $('flash').style.opacity = fl * 0.55;
+};
+window.renderFrame(0);
+</script>
+</body>
+</html>
