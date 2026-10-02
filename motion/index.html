@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #3A0014; }
+  body { font-family: 'Inter', sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  #bg, #light, #vignette { position: absolute; inset: 0; }
+  #vignette { background: radial-gradient(1400px 1700px at 50% 45%, transparent 55%, rgba(20,0,6,.55) 100%); }
+
+  /* phone */
+  #phone { position: absolute; left: 160px; top: 600px; width: 760px; height: 1560px;
+    border-radius: 96px; background: #141416; padding: 16px; transform-origin: 50% 25%;
+    box-shadow: 0 60px 140px rgba(20,0,8,.6), 0 0 0 3px #2c2c30 inset; }
+  #screen { position: relative; width: 100%; height: 100%; border-radius: 82px; overflow: hidden; background: #8e8e93; color: #111; }
+  #status { position: absolute; top: 0; left: 0; right: 0; height: 100px; display: flex; align-items: center;
+    justify-content: space-between; padding: 22px 56px 0 64px; font-weight: 700; font-size: 32px; color: #111; }
+  .sicons { display: flex; gap: 12px; align-items: center; }
+  .bars { display: flex; gap: 4px; align-items: flex-end; }
+  .bars i { width: 6px; background: #111; border-radius: 2px; display: block; }
+  .batt { width: 50px; height: 24px; border-radius: 7px; border: 2.5px solid #111; padding: 2px; }
+  .batt b { display: block; width: 100%; height: 100%; background: #111; border-radius: 3px; }
+  #sheet { position: absolute; top: 100px; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 40px 40px 0 0; padding: 0 30px; }
+  #handle { width: 84px; height: 7px; border-radius: 4px; background: #d9d9de; margin: 16px auto 0; }
+  #title { font-size: 44px; font-weight: 800; margin: 34px 0 0 10px; letter-spacing: -0.5px; }
+  #card { margin-top: 26px; background: #F3F3F6; border-radius: 40px; height: 660px; position: relative; }
+  #cardlbl { position: absolute; top: 30px; width: 100%; text-align: center; font-size: 26px; color: #8a8a90; font-weight: 500; }
+  #total { position: absolute; top: 66px; width: 100%; text-align: center; font-size: 50px; font-weight: 700; letter-spacing: -1px; }
+  #total small { font-size: 24px; color: #555; font-weight: 500; letter-spacing: 0; }
+  #pie { position: absolute; left: 50%; top: 140px; margin-left: -260px; width: 520px; height: 520px; }
+  #rows { margin-top: 14px; }
+  .row { display: flex; align-items: center; background: #F3F3F6; border-radius: 34px; height: 116px; padding: 0 30px 0 26px; margin-bottom: 10px; position: relative; }
+  .ico { width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .ico svg { width: 40px; height: 40px; }
+  .rtxt { margin-left: 22px; flex: 1; min-width: 0; }
+  .rname { font-size: 29px; font-weight: 600; white-space: nowrap; }
+  .rsub { font-size: 24px; color: #7c7c82; margin-top: 4px; }
+  .ramt { font-size: 29px; font-weight: 600; white-space: nowrap; }
+  .ramt small { font-size: 20px; color: #888; font-weight: 500; }
+  .badge { position: absolute; right: 30px; top: 12px; font-size: 20px; font-weight: 700; padding: 4px 12px; border-radius: 20px; color: #fff; }
+  #tap { position: absolute; width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,.35); border: 3px solid rgba(255,255,255,.9); }
+
+  /* typography */
+  .blk { position: absolute; left: 84px; right: 84px; top: 120px; }
+  .eyebrow { font-size: 28px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase; color: #F4AFC2; display: flex; align-items: center; gap: 18px; }
+  .eyebrow::before { content: ''; width: 46px; height: 3px; background: #F4AFC2; display: block; }
+  .head { margin-top: 26px; font-size: 80px; font-weight: 800; letter-spacing: -2.5px; line-height: 1.04; }
+  .sub { margin-top: 22px; font-size: 40px; font-weight: 500; color: rgba(255,255,255,.72); letter-spacing: -0.5px; line-height: 1.2; }
+  .mask { overflow: hidden; padding: 0.3em 0 6px; margin: -0.3em 0 -6px; }
+  .line { display: block; will-change: transform; }
+
+  /* logo */
+  .logo { display: flex; align-items: center; }
+  .logo img { display: block; height: 100%; }
+  .logo .word { font-weight: 800; letter-spacing: -2px; }
+  #logoTop { position: absolute; left: 84px; top: 90px; height: 52px; }
+  #logoTop .word { font-size: 46px; }
+
+  #end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #logoEnd { height: 150px; }
+  #logoEnd .word { font-size: 140px; letter-spacing: -6px; }
+  #endLine { font-size: 60px; font-weight: 800; text-align: center; letter-spacing: -2px; line-height: 1.08; margin-top: 70px; }
+  #endSub { font-size: 38px; font-weight: 500; color: rgba(255,255,255,.72); text-align: center; margin-top: 24px; line-height: 1.25; }
+  #endCta { margin-top: 70px; border: 2px solid rgba(255,255,255,.55); font-size: 34px; font-weight: 600; padding: 22px 44px; border-radius: 70px; letter-spacing: -0.3px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"></div><div id="light"></div>
+  <div id="phone"><div id="screen">
+    <div id="status"><span>9:41</span><span class="sicons">
+      <span class="bars"><i style="height:10px"></i><i style="height:15px"></i><i style="height:20px"></i><i style="height:25px"></i></span>
+      <span class="batt"><b></b></span></span></div>
+    <div id="sheet">
+      <div id="handle"></div>
+      <div id="title">Расходы</div>
+      <div id="card">
+        <div id="cardlbl">Итог за этот месяц</div>
+        <div id="total"></div>
+        <canvas id="pie" width="520" height="520"></canvas>
+      </div>
+      <div id="rows"></div>
+    </div>
+  </div><div id="tap"></div></div>
+  <div id="vignette"></div>
+  <div id="logoTop" class="logo"></div>
+  <div id="caps"></div>
+  <div id="end">
+    <div id="logoEnd" class="logo"></div>
+    <div id="endLine">Расходы<br>по категориям</div>
+    <div id="endSub">Узнай, что твои траты<br>говорят о тебе</div>
+    <div id="endCta">Приложение → История → Расходы</div>
+  </div>
+</div>
+
+<script>
+// ---------------- helpers ----------------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+// cubic-bezier(x1, y1, x2, y2) solver, same curve definition as CSS
+function cubicBezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const sx = u => ((ax * u + bx) * u + cx) * u, sy = u => ((ay * u + by) * u + cy) * u;
+  const dx = u => (3 * ax * u + 2 * bx) * u + cx;
+  return p => {
+    if (p <= 0) return 0; if (p >= 1) return 1;
+    let u = p;
+    for (let i = 0; i < 8; i++) { const e = sx(u) - p, d = dx(u); if (Math.abs(e) < 1e-6) return sy(u); if (Math.abs(d) < 1e-6) break; u -= e / d; }
+    let lo = 0, hi = 1; u = p;
+    while (hi - lo > 1e-6) { const v = sx(u); if (v < p) lo = u; else hi = u; u = (lo + hi) / 2; }
+    return sy(u);
+  };
+}
+const ease = cubicBezier(0.16, 1, 0.3, 1);          // Apple / Framer "expo out"
+const tw = (t, start, dur) => ease(prog(t, start, start + dur));
+
+// Damped spring (mass 1, stiffness 180, damping 12): exact step response, 0 -> 1.
+// Linear system, so retargeting = summing springs started at each new target.
+const SPRING = { stiffness: 180, damping: 12, mass: 1 };
+function spring(dt) {
+  if (dt <= 0) return 0;
+  const { stiffness: k, damping: c, mass: m } = SPRING;
+  const w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+  if (z < 1) {
+    const wd = w0 * Math.sqrt(1 - z * z);
+    return 1 - Math.exp(-z * w0 * dt) * (Math.cos(wd * dt) + (z * w0 / wd) * Math.sin(wd * dt));
+  }
+  return 1 - Math.exp(-w0 * dt) * (1 + w0 * dt);
+}
+const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const mix = (a, b, p) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], p))).join(',')})`; };
+const fmt = n => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const plural = (n, a, b, c) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? a : (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? b : c); };
+const $ = id => document.getElementById(id);
+
+// ---------------- logo: drop logo.svg (or logo.png) next to this file ----------------
+const logoReady = new Promise(resolve => {
+  const els = [$('logoTop'), $('logoEnd')];
+  const fallback = () => { els.forEach(el => el.innerHTML = '<span class="word">anorbank</span>'); resolve(false); };
+  const use = src => { els.forEach(el => { el.innerHTML = ''; const i = new Image(); i.src = src; el.appendChild(i); }); resolve(true); };
+  const svg = new Image();
+  svg.onload = () => use('logo.svg');
+  svg.onerror = () => { const png = new Image(); png.onload = () => use('logo.png'); png.onerror = fallback; png.src = 'logo.png'; };
+  svg.src = 'logo.svg';
+});
+window.logoReady = logoReady;
+
+// ---------------- icons (simple white glyphs like the app) ----------------
+const I = {
+  cart: '<path d="M6 9h28l-3 15H10L6 9zm6 0 4-6m12 6-4-6M14 15v4m6-4v4m6-4v4" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  food: '<path d="M12 4v32M8 4v10a4 4 0 0 0 8 0V4m12 32V4c-4 0-6 6-6 14h6" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  bag: '<path d="M8 13h24l-2 22H10L8 13zm6 0a6 6 0 0 1 12 0" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  home: '<path d="M5 19 20 6l15 13M10 15v18h20V15" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  heart: '<path d="M20 34S5 25 5 15a7.5 7.5 0 0 1 15-2 7.5 7.5 0 0 1 15 2c0 10-15 19-15 19z" fill="#fff"/>',
+  ticket: '<path d="M5 12h30v5a3 3 0 0 0 0 6v5H5v-5a3 3 0 0 0 0-6v-5zm19 0v16" stroke="#fff" stroke-width="3.2" fill="none" stroke-linejoin="round"/>',
+  smoke: '<path d="M8 30h22m-22 5h22M14 24c-3-4 3-6 0-10s3-6 0-9m8 19c-3-4 3-6 0-10s3-6 0-9" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/>',
+  sport: '<path d="M4 20h32M9 13v14m-4-10v6m26-10v14m4-10v6" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round"/>',
+  love: '<path d="M20 33S6 25 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 9-14 17-14 17z" fill="#fff"/>',
+  folder: '<path d="M5 11h11l3 4h16v18H5V11z" stroke="#fff" stroke-width="3.2" fill="none" stroke-linejoin="round"/>',
+};
+const svgIco = k => `<svg viewBox="0 0 40 40">${I[k]}</svg>`;
+
+// ---------------- data ----------------
+const CATS = [
+  { name: 'Продукты', color: '#2DB234', ico: 'cart', tx: 20 },
+  { name: 'Еда и рестораны', color: '#F57418', ico: 'food', tx: 16 },
+  { name: 'Маркетплейсы', color: '#7B2FF7', ico: 'bag', tx: 6 },
+  { name: 'Дом', color: '#EAAE00', ico: 'home', tx: 6 },
+  { name: 'Здоровье', color: '#E5332A', ico: 'heart', tx: 6 },
+  { name: 'Развлечения', color: '#2F6BFF', ico: 'ticket', tx: 24 },
+  { name: 'Кальян', color: '#56627A', ico: 'smoke', tx: 18 },
+  { name: 'Спорт', color: '#00B8D9', ico: 'sport', tx: 1 },
+  { name: 'Любимая', color: '#E8336E', ico: 'love', tx: 31 },
+  { name: 'Остальные', color: '#9C7178', ico: 'folder', tx: 5 },
+];
+const TOTAL = 12549000;
+//            Прод  Еда  Марк  Дом  Здор Разв Кал  Спорт Люб  Ост
+const S0 = [39.5, 21.5, 18.8, 15.2, 4.2, 0, 0, 0, 0, 0.8];
+const SA = [10, 16, 12, 8, 2, 52, 0, 0, 0, 0];
+const SB = [61, 8, 6, 15, 7, 0, 0, 0, 0, 3];
+const C1 = [25, 15, 12, 10, 4, 0, 8, 22, 0, 4];
+const C2 = [18, 12, 9, 8, 3, 0, 47, 1, 0, 2];
+const SD = [14, 12, 9, 6, 2, 0, 0, 0, 56, 1];
+const KEYS = [
+  [0, S0], [5.5, S0], [6.3, SA], [10, SA], [10.8, SB], [14.5, SB], [15.3, C1], [15.8, C1],
+  [18.3, C2], [20.5, C2], [22.0, SD], [25.5, SD], [26.5, S0], [30, S0],
+];
+function valuesAt(t) {
+  for (let i = 0; i < KEYS.length - 1; i++) {
+    const [ta, va] = KEYS[i], [tb, vb] = KEYS[i + 1];
+    if (t <= tb) { const p = ease(prog(t, ta, tb)); return va.map((v, j) => lerp(v, vb[j], p)); }
+  }
+  return KEYS[KEYS.length - 1][1];
+}
+
+const SCENES = [
+  { id: 'hook', t0: 0, t1: 3.0, rows: [0, 1, 2, 3], focus: -1 },
+  { id: 'intro', t0: 3.0, t1: 5.5, rows: [0, 1, 2, 3], focus: 0, focusAt: 4.1 },
+  { id: 'A', t0: 5.5, t1: 10.0, rows: [5, 1, 2, 0], focus: 5, focusAt: 6.2 },
+  { id: 'B', t0: 10.0, t1: 14.5, rows: [0, 3, 4, 1], focus: 0, focusAt: 10.7 },
+  { id: 'C', t0: 14.5, t1: 20.5, rows: [6, 7, 0, 1], focus: 6, focusAt: 15.8 },
+  { id: 'D', t0: 20.5, t1: 25.5, rows: [8, 0, 1, 2], focus: 8, focusAt: 21.3 },
+  { id: 'outro', t0: 25.5, t1: 99, rows: [0, 1, 2, 3], focus: -1 },
+];
+const sceneAt = t => SCENES.find(s => t >= s.t0 && t < s.t1) || SCENES[SCENES.length - 1];
+
+// ---------------- text blocks ----------------
+// parts: [kind, text (\n = new line), reveal time]
+const BLOCKS = [
+  { t0: 0.5, t1: 3.0, top: 200, parts: [['eyebrow', 'Расходы', 0.5], ['head', 'Скажи, на что\nты тратишь —', 0.65], ['sub', 'и мы скажем, кто ты.', 1.5]] },
+  { t0: 3.1, t1: 5.5, parts: [['eyebrow', 'Новое в приложении', 3.1], ['head', 'Расходы\nпо категориям', 3.2], ['sub', 'Каждый цвет — отдельная категория.', 3.8]] },
+  { t0: 5.6, t1: 10.0, parts: [['eyebrow', '01 · Развлечения 52%', 5.6], ['head', 'Ты любишь жить.', 6.2], ['sub', 'Но, может, пора\nпоработать над собой?', 7.8]] },
+  { t0: 10.1, t1: 14.5, parts: [['eyebrow', '02 · Продукты 61%', 10.1], ['head', 'Ты — семейный\nчеловек.', 10.7], ['sub', 'Дом, семья и полный холодильник.', 12.0]] },
+  { t0: 14.6, t1: 18.3, parts: [['eyebrow', '03 · Своя категория', 14.6], ['head', 'Кальян растёт.\nСпорт исчезает.', 15.4]] },
+  { t0: 18.5, t1: 20.5, parts: [['eyebrow', 'Кальян +39% · Спорт −21%', 18.5], ['head', 'Может, пора\nзаняться спортом?', 18.6]] },
+  { t0: 20.6, t1: 25.5, parts: [['eyebrow', '04 · Любимая 56%', 20.6], ['head', 'Больше половины\nбюджета — на неё.', 21.2], ['sub', 'Поздравляем, ты подкаблучник.', 22.6]] },
+  { t0: 25.6, t1: 27.6, parts: [['head', 'А что скажут\nтвои траты?', 25.7]] },
+];
+const capsEl = $('caps');
+BLOCKS.forEach(b => {
+  const el = document.createElement('div'); el.className = 'blk'; b.el = el; b.lines = [];
+  if (b.top) el.style.top = b.top + 'px';
+  b.parts.forEach(([kind, text, at]) => {
+    const p = document.createElement('div'); p.className = kind;
+    text.split('\n').forEach((ln, i) => {
+      const m = document.createElement('div'); m.className = 'mask';
+      const l = document.createElement('span'); l.className = 'line'; l.textContent = ln;
+      m.appendChild(l); p.appendChild(m);
+      b.lines.push({ el: l, at: at + i * 0.09, kind });
+    });
+    el.appendChild(p);
+  });
+  capsEl.appendChild(el);
+});
+function renderText(t) {
+  BLOCKS.forEach(b => {
+    const vis = t >= b.t0 - 0.01 && t < b.t1;
+    b.el.style.display = vis ? '' : 'none';
+    if (!vis) return;
+    b.el.style.opacity = 1 - tw(t, b.t1 - 0.35, 0.35);
+    b.el.style.transform = `translateY(${-30 * spring(t - (b.t1 - 0.35))}px)`;
+    b.lines.forEach(l => {
+      l.el.style.transform = `translateY(${(1 - spring(t - l.at)) * 125}%)`;
+      l.el.style.opacity = l.kind === 'eyebrow' ? tw(t, l.at, 0.5) : 1;
+    });
+  });
+}
+
+// ---------------- pie ----------------
+const ctx = $('pie').getContext('2d');
+function drawPie(vals, reveal, focus, pop, fadeAmt, dec) {
+  ctx.clearRect(0, 0, 520, 520);
+  const cx = 260, cy = 260, RO = 222, RI = 98, GAP = 7;
+  const total = vals.reduce((a, b) => a + b, 0);
+  let a = -Math.PI / 2;
+  const labels = [];
+  vals.forEach((v, i) => {
+    if (v <= 0.05) return;
+    const span = v / total * Math.PI * 2 * reveal;
+    const a0 = a, a1 = a + span; a += span;
+    const isF = i === focus;
+    const ro = RO + (isF ? 24 * pop : 0), ri = RI;
+    if (span * ri < GAP + 1.5) return;
+    let rr = clamp((span * ri - GAP) / 2, 0.5, 18);
+    rr = Math.min(rr, (ro - ri) / 2 - 1);
+    const roI = ro - rr, riI = ri + rr;
+    const insO = (GAP / 2 + rr) / roI;
+    const insI = Math.min((GAP / 2 + rr) / riI, span / 2 - 0.0001);
+    const fade = (isF || focus < 0) ? 0 : clamp(0.62 * fadeAmt);
+    const col = fade > 0 ? mix(CATS[i].color, '#F3F3F6', fade) : CATS[i].color;
+    ctx.beginPath();
+    ctx.arc(cx, cy, roI, a0 + insO, Math.max(a0 + insO, a1 - insO));
+    ctx.arc(cx, cy, riI, a1 - insI, a0 + insI, true);
+    ctx.closePath();
+    ctx.fillStyle = col; ctx.strokeStyle = col;
+    ctx.lineWidth = rr * 2; ctx.lineJoin = 'round';
+    ctx.fill(); ctx.stroke();
+    const am = (a0 + a1) / 2, rmid = (ro + ri) / 2;
+    if (span > 0.26) labels.push({ x: cx + Math.cos(am) * rmid, y: cy + Math.sin(am) * rmid, v, isF });
+  });
+  labels.forEach(l => {
+    ctx.save();
+    ctx.globalAlpha = (l.isF || focus < 0) ? 1 : 1 - 0.5 * fadeAmt;
+    ctx.font = `700 ${Math.round(31 * (l.isF ? 1 + 0.3 * pop : 1))}px Inter`;
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const r10 = Math.round(l.v * 10) / 10;
+    const txt = l.v < 1 ? '<1%' : (dec && r10 % 1 ? r10.toFixed(1) : Math.round(l.v)) + '%';
+    ctx.fillText(txt, l.x, l.y);
+    ctx.restore();
+  });
+}
+
+// ---------------- rows ----------------
+function renderRows(t, vals, sc) {
+  const out = [];
+  sc.rows.forEach((ci, k) => {
+    const c = CATS[ci];
+    const st = sc.t0 + 0.1 + k * 0.07;
+    const p = tw(t, st, 0.6), y = (1 - spring(t - st)) * 50;
+    const fp = sc.focusAt ? clamp(tw(t, sc.focusAt, 0.5) - tw(t, sc.t1 - 0.3, 0.3)) : 0;
+    const isF = ci === sc.focus;
+    const txt = ci === 9 ? `${c.tx} ${plural(c.tx, 'категория', 'категории', 'категорий')}` : `${c.tx} ${plural(c.tx, 'транзакция', 'транзакции', 'транзакций')}`;
+    let badge = '';
+    if (sc.id === 'C' && t > 16.0) {
+      const d = vals[ci] - C1[ci], o = prog(t, 16.0, 16.4);
+      if (ci === 6) badge = `<span class="badge" style="background:#D92D20;opacity:${o}">▲ +${Math.round(d)}%</span>`;
+      if (ci === 7) badge = `<span class="badge" style="background:#8E8E93;opacity:${o}">▼ ${Math.round(d)}%</span>`;
+    }
+    const hl = isF && fp > 0 ? `background:${mix('#F3F3F6', '#FFFFFF', fp)};box-shadow:0 0 0 ${3 * fp}px ${c.color}, 0 16px 40px rgba(0,0,0,${0.12 * fp});` : '';
+    out.push(`<div class="row" style="opacity:${p};transform:translateY(${y}px);${hl}">
+      <div class="ico" style="background:${c.color}">${svgIco(c.ico)}</div>
+      <div class="rtxt"><div class="rname">${c.name}</div><div class="rsub">${txt}</div></div>
+      <div class="ramt">-${fmt(vals[ci] / 100 * TOTAL)} <small>UZS</small></div>${badge}</div>`);
+  });
+  $('rows').innerHTML = out.join('');
+}
+
+// ---------------- camera per scene ----------------
+// [x, y, scale, rotateY]
+const CAM = { hook: [0, 0, 1, 0], intro: [0, -20, 1.02, -4], A: [-20, 0, 1.0, 4], B: [20, 0, 1.0, -4], C: [0, -40, 1.03, 3], D: [-10, 0, 1.0, -3], outro: [0, 30, 0.94, 0] };
+function camAt(t) {
+  const out = CAM.hook.slice();
+  for (let i = 1; i < SCENES.length; i++) {
+    const A = CAM[SCENES[i - 1].id], B = CAM[SCENES[i].id], s = spring(t - (SCENES[i].t0 - 0.2));
+    for (let k = 0; k < 4; k++) out[k] += (B[k] - A[k]) * s;
+  }
+  return out;
+}
+
+// ---------------- main ----------------
+window.renderFrame = function (t) {
+  $('bg').style.background = 'linear-gradient(170deg, #8A0A31 0%, #7B0126 35%, #4E0019 75%, #33000F 100%)';
+  const lx = 30 + Math.sin(t * 0.25) * 25, ly = 12 + Math.cos(t * 0.2) * 6;
+  $('light').style.background = `radial-gradient(1100px 900px at ${lx}% ${ly}%, rgba(214,46,94,.38), transparent 70%)`;
+
+  const rise = spring(t - 0.2);
+  const [cx, cy, cs, ry] = camAt(t);
+  const exit = spring(t - 27.2);
+  const float = Math.sin(t * 0.9) * 6;
+  $('phone').style.transform = `perspective(2400px) translate(${cx}px, ${(1 - rise) * 1400 + cy + float + exit * 1500}px) scale(${cs}) rotateY(${ry}deg)`;
+
+  const sc = sceneAt(t);
+  const vals = valuesAt(t);
+  const reveal = tw(t, 1.0, 1.6);
+  const pop = sc.focus >= 0 ? spring(t - sc.focusAt) - spring(t - (sc.t1 - 0.3)) : 0;
+  const fadeAmt = sc.focus >= 0 ? clamp(tw(t, sc.focusAt, 0.6) - tw(t, sc.t1 - 0.3, 0.3)) : 0;
+  drawPie(vals, reveal, sc.focus, pop, fadeAmt, t < 5.5 || t > 26.5);
+  $('total').innerHTML = `−${fmt(TOTAL * reveal)}<small>.35 UZS</small>`;
+  renderRows(t, vals, sc);
+
+  // touch indicator on the green segment
+  const tp = prog(t, 3.95, 4.55), tap = $('tap');
+  tap.style.display = tp > 0 && tp < 1 ? '' : 'none';
+  tap.style.left = '560px'; tap.style.top = '440px';
+  tap.style.transform = `scale(${0.6 + spring(t - 3.95) * 0.6})`;
+  tap.style.opacity = tp < 0.3 ? tp / 0.3 : 1 - (tp - 0.3) / 0.7;
+
+  renderText(t);
+
+  const lt = $('logoTop');
+  lt.style.opacity = tw(t, 0.1, 0.7) * (1 - tw(t, 2.6, 0.4));
+  lt.style.display = t < 3.0 ? '' : 'none';
+
+  const e = $('end');
+  e.style.display = t >= 27.4 ? 'flex' : 'none';
+  [['logoEnd', 27.5], ['endLine', 27.8], ['endSub', 28.0], ['endCta', 28.3]].forEach(([id, t0]) => {
+    $(id).style.opacity = tw(t, t0, 0.6);
+    $(id).style.transform = `translateY(${(1 - spring(t - t0)) * 50}px)`;
+  });
+};
+window.renderFrame(0);
+</script>
+</body>
+</html>
