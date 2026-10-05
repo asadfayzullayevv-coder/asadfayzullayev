@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #050203; }
+  body { font-family: 'Inter', sans-serif; color: #F5F5F7; -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  #bg { position: absolute; inset: 0; }
+
+  /* phone */
+  #phone { position: absolute; left: 160px; top: 560px; width: 760px; height: 1560px; transform-origin: 50% 30%; }
+  #frame { position: absolute; inset: 0; border-radius: 100px; padding: 18px;
+    background: linear-gradient(135deg, #6b6b70 0%, #2b2b2e 18%, #1a1a1c 50%, #3a3a3e 82%, #8a8a90 100%);
+    box-shadow: 0 80px 160px rgba(0,0,0,.7), 0 0 120px rgba(123,1,38,.35); }
+  #frame::before { content: ''; position: absolute; inset: 6px; border-radius: 94px; background: #0b0b0c; }
+  #screen { position: relative; width: 100%; height: 100%; border-radius: 82px; overflow: hidden; background: #8e8e93; color: #111; }
+  #glare { position: absolute; inset: 18px; border-radius: 82px; pointer-events: none;
+    background: linear-gradient(115deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 70%, rgba(255,255,255,.06) 100%); }
+  #status { position: absolute; top: 0; left: 0; right: 0; height: 100px; display: flex; align-items: center;
+    justify-content: space-between; padding: 22px 56px 0 64px; font-weight: 700; font-size: 32px; color: #111; }
+  .sicons { display: flex; gap: 12px; align-items: center; }
+  .bars { display: flex; gap: 4px; align-items: flex-end; }
+  .bars i { width: 6px; background: #111; border-radius: 2px; display: block; }
+  .batt { width: 50px; height: 24px; border-radius: 7px; border: 2.5px solid #111; padding: 2px; }
+  .batt b { display: block; width: 100%; height: 100%; background: #111; border-radius: 3px; }
+  #sheet { position: absolute; top: 100px; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 40px 40px 0 0; padding: 0 30px; }
+  #handle { width: 84px; height: 7px; border-radius: 4px; background: #d9d9de; margin: 16px auto 0; }
+  #title { font-size: 44px; font-weight: 800; margin: 34px 0 0 10px; letter-spacing: -0.5px; }
+  #card { margin-top: 26px; background: #F3F3F6; border-radius: 40px; height: 660px; position: relative; }
+  #cardlbl { position: absolute; top: 30px; width: 100%; text-align: center; font-size: 26px; color: #8a8a90; font-weight: 500; }
+  #total { position: absolute; top: 66px; width: 100%; text-align: center; font-size: 50px; font-weight: 700; letter-spacing: -1px; }
+  #total small { font-size: 24px; color: #555; font-weight: 500; letter-spacing: 0; }
+  #pie { position: absolute; left: 50%; top: 140px; margin-left: -260px; width: 520px; height: 520px; }
+  #rows { margin-top: 14px; }
+  .row { display: flex; align-items: center; background: #F3F3F6; border-radius: 34px; height: 116px; padding: 0 30px 0 26px; margin-bottom: 10px; position: relative; }
+  .ico { width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .ico svg { width: 40px; height: 40px; }
+  .rtxt { margin-left: 22px; flex: 1; min-width: 0; }
+  .rname { font-size: 29px; font-weight: 600; white-space: nowrap; }
+  .rsub { font-size: 24px; color: #7c7c82; margin-top: 4px; }
+  .ramt { font-size: 29px; font-weight: 600; white-space: nowrap; }
+  .ramt small { font-size: 20px; color: #888; font-weight: 500; }
+  .badge { position: absolute; right: 30px; top: 12px; font-size: 20px; font-weight: 700; padding: 4px 12px; border-radius: 20px; color: #fff; }
+  #tap { position: absolute; width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,.35); border: 3px solid rgba(255,255,255,.9); }
+
+  /* stat above the phone */
+  .stat { position: absolute; left: 0; right: 0; top: 130px; text-align: center; }
+  .stat .num { font-size: 230px; font-weight: 800; letter-spacing: -12px; line-height: 1; }
+  .stat .lbl { font-size: 42px; font-weight: 600; color: #A1A1A6; letter-spacing: -0.8px; margin-top: 10px; }
+  .stat .title { font-size: 96px; font-weight: 800; letter-spacing: -4px; line-height: 1.02; }
+
+  /* full-screen title cards */
+  .card { position: absolute; left: 70px; right: 70px; top: 50%; text-align: center; font-weight: 800; }
+  .card .ln { display: block; line-height: 1.02; }
+  .card .w { display: inline-block; white-space: pre; }
+  .card .sub { font-size: 46px; font-weight: 600; color: #A1A1A6; letter-spacing: -1px; margin-top: 46px; }
+  .grad { background: linear-gradient(180deg, #FF9DBA 0%, #F0336B 55%, #C8164F 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .08em; }
+
+  /* logo */
+  .logo { display: flex; align-items: center; justify-content: center; }
+  .logo img { display: block; height: 100%; }
+  .logo .word { font-weight: 800; letter-spacing: -6px; }
+  #end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #logoEnd { height: 150px; }
+  #logoEnd .word { font-size: 150px; }
+  #endLine { font-size: 76px; font-weight: 800; letter-spacing: -3px; margin-top: 80px; text-align: center; line-height: 1.04; }
+  #endSub { font-size: 44px; font-weight: 600; color: #A1A1A6; margin-top: 28px; letter-spacing: -1px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"></div>
+  <div id="phone"><div id="frame"></div><div style="position:absolute;inset:18px"><div id="screen">
+    <div id="status"><span>9:41</span><span class="sicons">
+      <span class="bars"><i style="height:10px"></i><i style="height:15px"></i><i style="height:20px"></i><i style="height:25px"></i></span>
+      <span class="batt"><b></b></span></span></div>
+    <div id="sheet">
+      <div id="handle"></div>
+      <div id="title">Расходы</div>
+      <div id="card">
+        <div id="cardlbl">Итог за этот месяц</div>
+        <div id="total"></div>
+        <canvas id="pie" width="520" height="520"></canvas>
+      </div>
+      <div id="rows"></div>
+    </div>
+  </div></div><div id="glare"></div><div id="tap"></div></div>
+  <div id="stats"></div>
+  <div id="cards"></div>
+  <div id="end">
+    <div id="logoEnd" class="logo"></div>
+    <div id="endLine">Расходы<br>по категориям.</div>
+    <div id="endSub">В приложении Anorbank.</div>
+  </div>
+</div>
+
+<script>
+// ---------------- helpers ----------------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const mix = (a, b, p) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], p))).join(',')})`; };
+const fmt = n => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const plural = (n, a, b, c) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? a : (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? b : c); };
+const $ = id => document.getElementById(id);
+
+// cubic-bezier(x1, y1, x2, y2) solver, same curve definition as CSS
+function cubicBezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const sx = u => ((ax * u + bx) * u + cx) * u, sy = u => ((ay * u + by) * u + cy) * u;
+  const dx = u => (3 * ax * u + 2 * bx) * u + cx;
+  return p => {
+    if (p <= 0) return 0; if (p >= 1) return 1;
+    let u = p;
+    for (let i = 0; i < 8; i++) { const e = sx(u) - p, d = dx(u); if (Math.abs(e) < 1e-6) return sy(u); if (Math.abs(d) < 1e-6) break; u -= e / d; }
+    let lo = 0, hi = 1; u = p;
+    while (hi - lo > 1e-6) { const v = sx(u); if (v < p) lo = u; else hi = u; u = (lo + hi) / 2; }
+    return sy(u);
+  };
+}
+const ease = cubicBezier(0.16, 1, 0.3, 1);          // Apple / Framer "expo out"
+const tw = (t, start, dur) => ease(prog(t, start, start + dur));
+
+// Damped spring (mass 1, stiffness 180, damping 12): exact step response, 0 -> 1.
+// Linear system, so retargeting = summing springs started at each new target.
+const SPRING = { stiffness: 180, damping: 12, mass: 1 };
+function spring(dt) {
+  if (dt <= 0) return 0;
+  const { stiffness: k, damping: c, mass: m } = SPRING;
+  const w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+  if (z < 1) {
+    const wd = w0 * Math.sqrt(1 - z * z);
+    return 1 - Math.exp(-z * w0 * dt) * (Math.cos(wd * dt) + (z * w0 / wd) * Math.sin(wd * dt));
+  }
+  return 1 - Math.exp(-w0 * dt) * (1 + w0 * dt);
+}
+
+// ---------------- logo: drop logo.svg (or logo.png) next to this file ----------------
+window.logoReady = new Promise(resolve => {
+  const el = $('logoEnd');
+  const fallback = () => { el.innerHTML = '<span class="word">anorbank</span>'; resolve(false); };
+  const use = src => { el.innerHTML = ''; const i = new Image(); i.src = src; el.appendChild(i); resolve(true); };
+  const svg = new Image();
+  svg.onload = () => use('logo.svg');
+  svg.onerror = () => { const png = new Image(); png.onload = () => use('logo.png'); png.onerror = fallback; png.src = 'logo.png'; };
+  svg.src = 'logo.svg';
+});
+
+// ---------------- icons ----------------
+const I = {
+  cart: '<path d="M6 9h28l-3 15H10L6 9zm6 0 4-6m12 6-4-6M14 15v4m6-4v4m6-4v4" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  food: '<path d="M12 4v32M8 4v10a4 4 0 0 0 8 0V4m12 32V4c-4 0-6 6-6 14h6" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  bag: '<path d="M8 13h24l-2 22H10L8 13zm6 0a6 6 0 0 1 12 0" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  home: '<path d="M5 19 20 6l15 13M10 15v18h20V15" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  heart: '<path d="M20 34S5 25 5 15a7.5 7.5 0 0 1 15-2 7.5 7.5 0 0 1 15 2c0 10-15 19-15 19z" fill="#fff"/>',
+  ticket: '<path d="M5 12h30v5a3 3 0 0 0 0 6v5H5v-5a3 3 0 0 0 0-6v-5zm19 0v16" stroke="#fff" stroke-width="3.2" fill="none" stroke-linejoin="round"/>',
+  smoke: '<path d="M8 30h22m-22 5h22M14 24c-3-4 3-6 0-10s3-6 0-9m8 19c-3-4 3-6 0-10s3-6 0-9" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/>',
+  sport: '<path d="M4 20h32M9 13v14m-4-10v6m26-10v14m4-10v6" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round"/>',
+  love: '<path d="M20 33S6 25 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 9-14 17-14 17z" fill="#fff"/>',
+  folder: '<path d="M5 11h11l3 4h16v18H5V11z" stroke="#fff" stroke-width="3.2" fill="none" stroke-linejoin="round"/>',
+};
+const svgIco = k => `<svg viewBox="0 0 40 40">${I[k]}</svg>`;
+
+// ---------------- data ----------------
+const CATS = [
+  { name: 'Продукты', color: '#2DB234', ico: 'cart', tx: 20 },
+  { name: 'Еда и рестораны', color: '#F57418', ico: 'food', tx: 16 },
+  { name: 'Маркетплейсы', color: '#7B2FF7', ico: 'bag', tx: 6 },
+  { name: 'Дом', color: '#EAAE00', ico: 'home', tx: 6 },
+  { name: 'Здоровье', color: '#E5332A', ico: 'heart', tx: 6 },
+  { name: 'Развлечения', color: '#2F6BFF', ico: 'ticket', tx: 24 },
+  { name: 'Кальян', color: '#56627A', ico: 'smoke', tx: 18 },
+  { name: 'Спорт', color: '#00B8D9', ico: 'sport', tx: 1 },
+  { name: 'Любимая', color: '#E8336E', ico: 'love', tx: 31 },
+  { name: 'Остальные', color: '#9C7178', ico: 'folder', tx: 5 },
+];
+const TOTAL = 12549000;
+//            Прод  Еда  Марк  Дом  Здор Разв Кал  Спорт Люб  Ост
+const S0 = [39.5, 21.5, 18.8, 15.2, 4.2, 0, 0, 0, 0, 0.8];
+const SA = [10, 16, 12, 8, 2, 52, 0, 0, 0, 0];
+const SB = [61, 8, 6, 15, 7, 0, 0, 0, 0, 3];
+const C1 = [25, 15, 12, 10, 4, 0, 8, 22, 0, 4];
+const C2 = [18, 12, 9, 8, 3, 0, 47, 1, 0, 2];
+const SD = [14, 12, 9, 6, 2, 0, 0, 0, 56, 1];
+const KEYS = [
+  [0, S0], [5.5, S0], [6.4, SA], [10, SA], [10.9, SB], [14.5, SB], [15.3, C1], [15.8, C1],
+  [17.6, C2], [20.5, C2], [21.6, SD], [30, SD],
+];
+function valuesAt(t) {
+  for (let i = 0; i < KEYS.length - 1; i++) {
+    const [ta, va] = KEYS[i], [tb, vb] = KEYS[i + 1];
+    if (t <= tb) { const p = ease(prog(t, ta, tb)); return va.map((v, j) => lerp(v, vb[j], p)); }
+  }
+  return KEYS[KEYS.length - 1][1];
+}
+
+// what the phone screen shows
+const SCENES = [
+  { id: 'intro', t0: 0, t1: 5.5, rows: [0, 1, 2, 3], focus: 0, focusAt: 4.1 },
+  { id: 'A', t0: 5.5, t1: 10.0, rows: [5, 1, 2, 0], focus: 5, focusAt: 6.2 },
+  { id: 'B', t0: 10.0, t1: 14.5, rows: [0, 3, 4, 1], focus: 0, focusAt: 10.7 },
+  { id: 'C', t0: 14.5, t1: 20.5, rows: [6, 7, 0, 1], focus: 6, focusAt: 15.8 },
+  { id: 'D', t0: 20.5, t1: 99, rows: [8, 0, 1, 2], focus: 8, focusAt: 21.3 },
+];
+const sceneAt = t => SCENES.find(s => t >= s.t0 && t < s.t1) || SCENES[SCENES.length - 1];
+
+// ---------------- camera: phone shot vs. title card ----------------
+// cam: [x, y, scale, rotateY]; look: 0 = sharp, 1 = pushed back + blurred, 2 = hidden
+const SHOTS = [
+  { t: 0, cam: [0, 420, 0.92, 0], look: 2 },
+  { t: 2.75, cam: [0, 0, 1, 0], look: 0 },
+  { t: 5.5, cam: [0, 0, 1.03, -6], look: 0 },
+  { t: 7.0, cam: [0, 90, 0.86, 0], look: 1 },
+  { t: 10.0, cam: [0, 0, 1.03, 6], look: 0 },
+  { t: 11.8, cam: [0, 90, 0.86, 0], look: 1 },
+  { t: 14.5, cam: [0, 0, 1.03, -5], look: 0 },
+  { t: 18.0, cam: [0, 90, 0.86, 0], look: 1 },
+  { t: 20.5, cam: [0, 0, 1.03, 5], look: 0 },
+  { t: 22.5, cam: [0, 90, 0.86, 0], look: 1 },
+  { t: 27.2, cam: [0, 380, 0.82, 0], look: 2 },
+];
+function camAt(t) {
+  const out = SHOTS[0].cam.slice();
+  for (let i = 1; i < SHOTS.length; i++) {
+    const s = spring(t - SHOTS[i].t);
+    for (let k = 0; k < 4; k++) out[k] += (SHOTS[i].cam[k] - SHOTS[i - 1].cam[k]) * s;
+  }
+  return out;
+}
+function lookAt(t) {   // bezier blend between looks
+  let v = SHOTS[0].look;
+  for (let i = 1; i < SHOTS.length; i++) v += (SHOTS[i].look - SHOTS[i - 1].look) * tw(t, SHOTS[i].t, 0.7);
+  return v;
+}
+
+// ---------------- stats above the phone ----------------
+const STATS = [
+  { t0: 2.9, t1: 5.5, title: 'Каждый цвет —\nсвоя категория.' },
+  { t0: 5.6, t1: 7.0, from: 0, to: 52, at: 5.7, dur: 0.9, pre: '', lbl: 'уходит на развлечения' },
+  { t0: 10.1, t1: 11.8, from: 0, to: 61, at: 10.2, dur: 0.9, pre: '', lbl: 'уходит на продукты' },
+  { t0: 14.6, t1: 18.0, from: 0, to: 39, at: 15.8, dur: 1.8, pre: '+', lbl: 'на кальян. Спорт — почти ноль.' },
+  { t0: 20.6, t1: 22.5, from: 0, to: 56, at: 20.7, dur: 1.0, pre: '', lbl: 'уходит на «Любимую»' },
+];
+const statsEl = $('stats');
+STATS.forEach(s => {
+  const el = document.createElement('div'); el.className = 'stat'; s.el = el;
+  if (s.title) el.innerHTML = `<div class="title">${s.title.replace('\n', '<br>')}</div>`;
+  else el.innerHTML = `<div class="num grad"></div><div class="lbl">${s.lbl}</div>`;
+  statsEl.appendChild(el);
+});
+function renderStats(t) {
+  STATS.forEach(s => {
+    const vis = t >= s.t0 && t < s.t1;
+    s.el.style.display = vis ? '' : 'none';
+    if (!vis) return;
+    const inn = tw(t, s.t0, 0.7), out = tw(t, s.t1 - 0.4, 0.4);
+    s.el.style.opacity = inn * (1 - out);
+    s.el.style.filter = `blur(${(1 - inn) * 14 + out * 10}px)`;
+    s.el.style.transform = `translateY(${(1 - spring(t - s.t0)) * 40 - spring(t - (s.t1 - 0.4)) * 30}px)`;
+    if (!s.title) s.el.firstChild.textContent = s.pre + Math.round(lerp(s.from, s.to, tw(t, s.at, s.dur))) + '%';
+  });
+}
+
+// ---------------- full-screen title cards ----------------
+// *text* = gradient accent; \n = line break
+const CARDS = [
+  { t0: 0.3, t1: 2.75, size: 118, text: 'Покажи\nсвои траты —\n*и мы скажем,\nкто ты.*' },
+  { t0: 7.0, t1: 8.55, size: 168, text: 'Ты *любишь\nжить.*' },
+  { t0: 8.55, t1: 10.0, size: 146, text: 'Но пора\n*работать\nнад собой.*' },
+  { t0: 11.8, t1: 14.5, size: 150, text: 'Ты —\n*семейный\nчеловек.*' },
+  { t0: 18.0, t1: 20.5, size: 132, text: 'Может, пора\n*заняться\nспортом?*' },
+  { t0: 22.5, t1: 24.1, size: 124, text: 'Больше половины\nбюджета —\n*на неё.*' },
+  { t0: 24.1, t1: 25.7, size: 118, text: 'Ты\n*подкаблучник.*', sub: 'Шутка. Почти.', subAt: 24.9 },
+  { t0: 25.7, t1: 27.4, size: 132, text: 'А что скажут\n*твои траты?*' },
+];
+const cardsEl = $('cards');
+CARDS.forEach(c => {
+  const el = document.createElement('div'); el.className = 'card'; c.el = el; c.words = [];
+  el.style.fontSize = c.size + 'px';
+  el.style.letterSpacing = (-0.045 * c.size) + 'px';
+  let accent = false, idx = 0;
+  c.text.split('\n').forEach(line => {
+    const ln = document.createElement('span'); ln.className = 'ln';
+    line.split(/(\*)/).forEach(seg => {
+      if (seg === '*') { accent = !accent; return; }
+      seg.split(/(\s+)/).forEach(w => {
+        if (!w) return;
+        if (/^\s+$/.test(w)) { ln.appendChild(document.createTextNode(' ')); return; }
+        const s = document.createElement('span'); s.className = 'w' + (accent ? ' grad' : ''); s.textContent = w;
+        ln.appendChild(s); c.words.push({ el: s, at: c.t0 + idx++ * 0.075 });
+      });
+    });
+    el.appendChild(ln);
+  });
+  if (c.sub) { const s = document.createElement('div'); s.className = 'sub'; s.textContent = c.sub; el.appendChild(s); c.subEl = s; }
+  cardsEl.appendChild(el);
+});
+function renderCards(t) {
+  CARDS.forEach(c => {
+    const vis = t >= c.t0 && t < c.t1;
+    c.el.style.display = vis ? '' : 'none';
+    if (!vis) return;
+    const out = tw(t, c.t1 - 0.35, 0.35);
+    c.el.style.opacity = 1 - out;
+    c.el.style.filter = out > 0.01 ? `blur(${out * 16}px)` : 'none';
+    c.el.style.transform = `translateY(calc(-50% - ${spring(t - (c.t1 - 0.35)) * 40}px)) scale(${1 + 0.02 * spring(t - c.t0)})`;
+    c.words.forEach(w => {
+      const o = tw(t, w.at, 0.8);
+      w.el.style.opacity = o;
+      w.el.style.filter = o < 0.99 ? `blur(${(1 - o) * 18}px)` : 'none';
+      w.el.style.transform = `translateY(${(1 - spring(t - w.at)) * 60}px)`;
+    });
+    if (c.subEl) {
+      const o = tw(t, c.subAt, 0.7);
+      c.subEl.style.opacity = o;
+      c.subEl.style.transform = `translateY(${(1 - spring(t - c.subAt)) * 30}px)`;
+    }
+  });
+}
+
+// ---------------- pie ----------------
+const ctx = $('pie').getContext('2d');
+function drawPie(vals, reveal, focus, pop, fadeAmt) {
+  ctx.clearRect(0, 0, 520, 520);
+  const cx = 260, cy = 260, RO = 222, RI = 98, GAP = 7;
+  const total = vals.reduce((a, b) => a + b, 0);
+  let a = -Math.PI / 2;
+  const labels = [];
+  vals.forEach((v, i) => {
+    if (v <= 0.05) return;
+    const span = v / total * Math.PI * 2 * reveal;
+    const a0 = a, a1 = a + span; a += span;
+    const isF = i === focus;
+    const ro = RO + (isF ? 24 * pop : 0), ri = RI;
+    if (span * ri < GAP + 1.5) return;
+    let rr = clamp((span * ri - GAP) / 2, 0.5, 18);
+    rr = Math.min(rr, (ro - ri) / 2 - 1);
+    const roI = ro - rr, riI = ri + rr;
+    const insO = (GAP / 2 + rr) / roI;
+    const insI = Math.min((GAP / 2 + rr) / riI, span / 2 - 0.0001);
+    const fade = (isF || focus < 0) ? 0 : clamp(0.62 * fadeAmt);
+    const col = fade > 0 ? mix(CATS[i].color, '#F3F3F6', fade) : CATS[i].color;
+    ctx.beginPath();
+    ctx.arc(cx, cy, roI, a0 + insO, Math.max(a0 + insO, a1 - insO));
+    ctx.arc(cx, cy, riI, a1 - insI, a0 + insI, true);
+    ctx.closePath();
+    ctx.fillStyle = col; ctx.strokeStyle = col;
+    ctx.lineWidth = rr * 2; ctx.lineJoin = 'round';
+    ctx.fill(); ctx.stroke();
+    const am = (a0 + a1) / 2, rmid = (ro + ri) / 2;
+    if (span > 0.26) labels.push({ x: cx + Math.cos(am) * rmid, y: cy + Math.sin(am) * rmid, v, isF });
+  });
+  labels.forEach(l => {
+    ctx.save();
+    ctx.globalAlpha = (l.isF || focus < 0) ? 1 : 1 - 0.5 * fadeAmt;
+    ctx.font = `700 ${Math.round(31 * (l.isF ? 1 + 0.3 * pop : 1))}px Inter`;
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText((l.v < 1 ? '<1' : Math.round(l.v)) + '%', l.x, l.y);
+    ctx.restore();
+  });
+}
+
+// ---------------- rows ----------------
+function renderRows(t, vals, sc) {
+  const out = [];
+  sc.rows.forEach((ci, k) => {
+    const c = CATS[ci];
+    const st = sc.t0 + 0.1 + k * 0.07;
+    const p = tw(t, st, 0.6), y = (1 - spring(t - st)) * 50;
+    const fp = clamp(tw(t, sc.focusAt, 0.5));
+    const isF = ci === sc.focus;
+    const txt = ci === 9 ? `${c.tx} ${plural(c.tx, 'категория', 'категории', 'категорий')}` : `${c.tx} ${plural(c.tx, 'транзакция', 'транзакции', 'транзакций')}`;
+    let badge = '';
+    if (sc.id === 'C' && t > 16.0) {
+      const d = vals[ci] - C1[ci], o = tw(t, 16.0, 0.4);
+      if (ci === 6) badge = `<span class="badge" style="background:#D92D20;opacity:${o}">▲ +${Math.round(d)}%</span>`;
+      if (ci === 7) badge = `<span class="badge" style="background:#8E8E93;opacity:${o}">▼ ${Math.round(d)}%</span>`;
+    }
+    const hl = isF && fp > 0 ? `background:${mix('#F3F3F6', '#FFFFFF', fp)};box-shadow:0 0 0 ${3 * fp}px ${c.color}, 0 16px 40px rgba(0,0,0,${0.12 * fp});` : '';
+    out.push(`<div class="row" style="opacity:${p};transform:translateY(${y}px);${hl}">
+      <div class="ico" style="background:${c.color}">${svgIco(c.ico)}</div>
+      <div class="rtxt"><div class="rname">${c.name}</div><div class="rsub">${txt}</div></div>
+      <div class="ramt">-${fmt(vals[ci] / 100 * TOTAL)} <small>UZS</small></div>${badge}</div>`);
+  });
+  $('rows').innerHTML = out.join('');
+}
+
+// ---------------- main ----------------
+window.renderFrame = function (t) {
+  // near-black with a deep Anorbank burgundy glow
+  const g = 0.85 + 0.15 * Math.sin(t * 0.6);
+  $('bg').style.background =
+    `radial-gradient(1000px 1100px at 50% ${58 + Math.sin(t * 0.3) * 4}%, rgba(123,1,38,${0.62 * g}) 0%, rgba(123,1,38,.18) 45%, transparent 75%),` +
+    `radial-gradient(900px 600px at 50% -5%, rgba(176,20,74,.22), transparent 70%), #050203`;
+
+  // phone
+  const [cx, cy, cs, ry] = camAt(t);
+  const look = lookAt(t);
+  const ph = $('phone');
+  ph.style.transform = `perspective(2600px) translate(${cx}px, ${cy}px) scale(${cs}) rotateY(${ry}deg)`;
+  const dimAmt = clamp(look), hide = clamp(look - 1);
+  ph.style.filter = dimAmt > 0.01 ? `blur(${dimAmt * 30}px) brightness(${1 - 0.78 * dimAmt})` : 'none';
+  ph.style.opacity = 1 - hide;
+  $('glare').style.transform = `translateX(${Math.sin(t * 0.5) * 40}px)`;
+
+  const sc = sceneAt(t);
+  const vals = valuesAt(t);
+  const reveal = tw(t, 2.8, 1.4);
+  const pop = spring(t - sc.focusAt);
+  const fadeAmt = clamp(tw(t, sc.focusAt, 0.6));
+  drawPie(vals, reveal, sc.focus, pop, fadeAmt);
+  $('total').innerHTML = `−${fmt(TOTAL * reveal)}<small>.35 UZS</small>`;
+  renderRows(t, vals, sc);
+
+  // touch indicator on the green segment
+  const tap = $('tap');
+  const tv = t > 3.95 && t < 4.6;
+  tap.style.display = tv ? '' : 'none';
+  tap.style.left = '578px'; tap.style.top = '458px';
+  tap.style.transform = `scale(${0.6 + spring(t - 3.95) * 0.5})`;
+  tap.style.opacity = tw(t, 3.95, 0.15) * (1 - tw(t, 4.25, 0.35));
+
+  renderStats(t);
+  renderCards(t);
+
+  // end card
+  const e = $('end');
+  e.style.display = t >= 27.5 ? 'flex' : 'none';
+  [['logoEnd', 27.55], ['endLine', 27.85], ['endSub', 28.15]].forEach(([id, t0]) => {
+    const o = tw(t, t0, 0.8);
+    $(id).style.opacity = o;
+    $(id).style.filter = o < 0.99 ? `blur(${(1 - o) * 16}px)` : 'none';
+    $(id).style.transform = `translateY(${(1 - spring(t - t0)) * 40}px)`;
+  });
+};
+window.renderFrame(0);
+</script>
+</body>
+</html>
