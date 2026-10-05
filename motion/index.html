@@ -48,17 +48,16 @@
 
   /* stat above the phone */
   .stat { position: absolute; left: 0; right: 0; top: 130px; text-align: center; }
-  .stat .num { font-size: 230px; font-weight: 800; letter-spacing: -12px; line-height: 1; }
+  .stat .num { font-size: 230px; font-weight: 700; letter-spacing: -12px; line-height: 1; }
   .stat .lbl { font-size: 42px; font-weight: 600; color: #A1A1A6; letter-spacing: -0.8px; margin-top: 10px; }
-  .stat .title { font-size: 96px; font-weight: 800; letter-spacing: -4px; line-height: 1.02; }
+  .stat .title { font-size: 96px; font-weight: 700; letter-spacing: -4px; line-height: 1.02; }
 
   /* full-screen title cards */
-  .card { position: absolute; left: 70px; right: 70px; top: 50%; text-align: center; font-weight: 800; }
+  .card { position: absolute; left: 70px; right: 70px; top: 50%; text-align: center; font-weight: 700; color: #6E6E73; }
   .card .ln { display: block; line-height: 1.02; }
   .card .w { display: inline-block; white-space: pre; }
   .card .sub { font-size: 46px; font-weight: 600; color: #A1A1A6; letter-spacing: -1px; margin-top: 46px; }
-  .grad { background: linear-gradient(180deg, #FF9DBA 0%, #F0336B 55%, #C8164F 100%);
-    -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .08em; }
+  .grad { color: #F5F5F7; }
 
   /* logo */
   .logo { display: flex; align-items: center; justify-content: center; }
@@ -127,9 +126,9 @@ function cubicBezier(x1, y1, x2, y2) {
 const ease = cubicBezier(0.16, 1, 0.3, 1);          // Apple / Framer "expo out"
 const tw = (t, start, dur) => ease(prog(t, start, start + dur));
 
-// Damped spring (mass 1, stiffness 180, damping 12): exact step response, 0 -> 1.
+// Damped spring (mass 1, stiffness 180, damping 26): exact step response, 0 -> 1.
 // Linear system, so retargeting = summing springs started at each new target.
-const SPRING = { stiffness: 180, damping: 12, mass: 1 };
+const SPRING = { stiffness: 180, damping: 26, mass: 1 };  // near-critical: no bounce
 function spring(dt) {
   if (dt <= 0) return 0;
   const { stiffness: k, damping: c, mass: m } = SPRING;
@@ -189,8 +188,8 @@ const C1 = [25, 15, 12, 10, 4, 0, 8, 22, 0, 4];
 const C2 = [18, 12, 9, 8, 3, 0, 47, 1, 0, 2];
 const SD = [14, 12, 9, 6, 2, 0, 0, 0, 56, 1];
 const KEYS = [
-  [0, S0], [5.5, S0], [6.4, SA], [10, SA], [10.9, SB], [14.5, SB], [15.3, C1], [15.8, C1],
-  [17.6, C2], [20.5, C2], [21.6, SD], [30, SD],
+  [0, S0], [7.0, S0], [7.9, SA], [14.5, SA], [15.4, SB], [20, SB], [20.7, C1], [21.5, C1],
+  [23.8, C2], [27, C2], [28.0, SD], [40, SD],
 ];
 function valuesAt(t) {
   for (let i = 0; i < KEYS.length - 1; i++) {
@@ -202,11 +201,11 @@ function valuesAt(t) {
 
 // what the phone screen shows
 const SCENES = [
-  { id: 'intro', t0: 0, t1: 5.5, rows: [0, 1, 2, 3], focus: 0, focusAt: 4.1 },
-  { id: 'A', t0: 5.5, t1: 10.0, rows: [5, 1, 2, 0], focus: 5, focusAt: 6.2 },
-  { id: 'B', t0: 10.0, t1: 14.5, rows: [0, 3, 4, 1], focus: 0, focusAt: 10.7 },
-  { id: 'C', t0: 14.5, t1: 20.5, rows: [6, 7, 0, 1], focus: 6, focusAt: 15.8 },
-  { id: 'D', t0: 20.5, t1: 99, rows: [8, 0, 1, 2], focus: 8, focusAt: 21.3 },
+  { id: 'intro', t0: 0, t1: 7.0, rows: [0, 1, 2, 3], focus: 0, focusAt: 5.0 },
+  { id: 'A', t0: 7.0, t1: 14.5, rows: [5, 1, 2, 0], focus: 5, focusAt: 7.7 },
+  { id: 'B', t0: 14.5, t1: 20.0, rows: [0, 3, 4, 1], focus: 0, focusAt: 15.3 },
+  { id: 'C', t0: 20.0, t1: 27.0, rows: [6, 7, 0, 1], focus: 6, focusAt: 21.5 },
+  { id: 'D', t0: 27.0, t1: 99, rows: [8, 0, 1, 2], focus: 8, focusAt: 27.9 },
 ];
 const sceneAt = t => SCENES.find(s => t >= s.t0 && t < s.t1) || SCENES[SCENES.length - 1];
 
@@ -214,16 +213,16 @@ const sceneAt = t => SCENES.find(s => t >= s.t0 && t < s.t1) || SCENES[SCENES.le
 // cam: [x, y, scale, rotateY]; look: 0 = sharp, 1 = pushed back + blurred, 2 = hidden
 const SHOTS = [
   { t: 0, cam: [0, 420, 0.92, 0], look: 2 },
-  { t: 2.75, cam: [0, 0, 1, 0], look: 0 },
-  { t: 5.5, cam: [0, 0, 1.03, -6], look: 0 },
-  { t: 7.0, cam: [0, 90, 0.86, 0], look: 1 },
-  { t: 10.0, cam: [0, 0, 1.03, 6], look: 0 },
-  { t: 11.8, cam: [0, 90, 0.86, 0], look: 1 },
-  { t: 14.5, cam: [0, 0, 1.03, -5], look: 0 },
-  { t: 18.0, cam: [0, 90, 0.86, 0], look: 1 },
-  { t: 20.5, cam: [0, 0, 1.03, 5], look: 0 },
-  { t: 22.5, cam: [0, 90, 0.86, 0], look: 1 },
-  { t: 27.2, cam: [0, 380, 0.82, 0], look: 2 },
+  { t: 3.4, cam: [0, 0, 1, 0], look: 0 },
+  { t: 7.0, cam: [0, 0, 1.03, -5], look: 0 },
+  { t: 9.5, cam: [0, 90, 0.86, 0], look: 1 },
+  { t: 14.5, cam: [0, 0, 1.03, 5], look: 0 },
+  { t: 17.0, cam: [0, 90, 0.86, 0], look: 1 },
+  { t: 20.0, cam: [0, 0, 1.03, -4], look: 0 },
+  { t: 24.0, cam: [0, 90, 0.86, 0], look: 1 },
+  { t: 27.0, cam: [0, 0, 1.03, 4], look: 0 },
+  { t: 29.5, cam: [0, 90, 0.86, 0], look: 1 },
+  { t: 37.2, cam: [0, 380, 0.82, 0], look: 2 },
 ];
 function camAt(t) {
   const out = SHOTS[0].cam.slice();
@@ -235,17 +234,17 @@ function camAt(t) {
 }
 function lookAt(t) {   // bezier blend between looks
   let v = SHOTS[0].look;
-  for (let i = 1; i < SHOTS.length; i++) v += (SHOTS[i].look - SHOTS[i - 1].look) * tw(t, SHOTS[i].t, 0.7);
+  for (let i = 1; i < SHOTS.length; i++) v += (SHOTS[i].look - SHOTS[i - 1].look) * tw(t, SHOTS[i].t, 1.1);
   return v;
 }
 
 // ---------------- stats above the phone ----------------
 const STATS = [
-  { t0: 2.9, t1: 5.5, title: 'Каждый цвет —\nсвоя категория.' },
-  { t0: 5.6, t1: 7.0, from: 0, to: 52, at: 5.7, dur: 0.9, pre: '', lbl: 'уходит на развлечения' },
-  { t0: 10.1, t1: 11.8, from: 0, to: 61, at: 10.2, dur: 0.9, pre: '', lbl: 'уходит на продукты' },
-  { t0: 14.6, t1: 18.0, from: 0, to: 39, at: 15.8, dur: 1.8, pre: '+', lbl: 'на кальян. Спорт — почти ноль.' },
-  { t0: 20.6, t1: 22.5, from: 0, to: 56, at: 20.7, dur: 1.0, pre: '', lbl: 'уходит на «Любимую»' },
+  { t0: 3.6, t1: 7.0, title: 'Каждый цвет —\nсвоя категория.' },
+  { t0: 7.1, t1: 9.5, from: 0, to: 52, at: 7.3, dur: 1.4, pre: '', lbl: 'уходит на развлечения' },
+  { t0: 14.6, t1: 17.0, from: 0, to: 61, at: 14.8, dur: 1.4, pre: '', lbl: 'уходит на продукты' },
+  { t0: 20.1, t1: 24.0, from: 0, to: 39, at: 21.5, dur: 2.3, pre: '+', lbl: 'на кальян. Спорт — почти ноль.' },
+  { t0: 27.1, t1: 29.5, from: 0, to: 56, at: 27.3, dur: 1.4, pre: '', lbl: 'уходит на «Любимую»' },
 ];
 const statsEl = $('stats');
 STATS.forEach(s => {
@@ -259,10 +258,10 @@ function renderStats(t) {
     const vis = t >= s.t0 && t < s.t1;
     s.el.style.display = vis ? '' : 'none';
     if (!vis) return;
-    const inn = tw(t, s.t0, 0.7), out = tw(t, s.t1 - 0.4, 0.4);
+    const inn = tw(t, s.t0, 1.0), out = tw(t, s.t1 - 0.5, 0.5);
     s.el.style.opacity = inn * (1 - out);
     s.el.style.filter = `blur(${(1 - inn) * 14 + out * 10}px)`;
-    s.el.style.transform = `translateY(${(1 - spring(t - s.t0)) * 40 - spring(t - (s.t1 - 0.4)) * 30}px)`;
+    s.el.style.transform = `translateY(${(1 - spring(t - s.t0)) * 40 - spring(t - (s.t1 - 0.5)) * 30}px)`;
     if (!s.title) s.el.firstChild.textContent = s.pre + Math.round(lerp(s.from, s.to, tw(t, s.at, s.dur))) + '%';
   });
 }
@@ -270,14 +269,14 @@ function renderStats(t) {
 // ---------------- full-screen title cards ----------------
 // *text* = gradient accent; \n = line break
 const CARDS = [
-  { t0: 0.3, t1: 2.75, size: 118, text: 'Покажи\nсвои траты —\n*и мы скажем,\nкто ты.*' },
-  { t0: 7.0, t1: 8.55, size: 168, text: 'Ты *любишь\nжить.*' },
-  { t0: 8.55, t1: 10.0, size: 146, text: 'Но пора\n*работать\nнад собой.*' },
-  { t0: 11.8, t1: 14.5, size: 150, text: 'Ты —\n*семейный\nчеловек.*' },
-  { t0: 18.0, t1: 20.5, size: 132, text: 'Может, пора\n*заняться\nспортом?*' },
-  { t0: 22.5, t1: 24.1, size: 124, text: 'Больше половины\nбюджета —\n*на неё.*' },
-  { t0: 24.1, t1: 25.7, size: 118, text: 'Ты\n*подкаблучник.*', sub: 'Шутка. Почти.', subAt: 24.9 },
-  { t0: 25.7, t1: 27.4, size: 132, text: 'А что скажут\n*твои траты?*' },
+  { t0: 0.4, t1: 3.4, size: 118, text: 'Покажи\nсвои траты —\n*и мы скажем,\nкто ты.*' },
+  { t0: 9.5, t1: 12.0, size: 168, text: 'Ты *любишь\nжить.*' },
+  { t0: 12.0, t1: 14.5, size: 146, text: 'Но пора\n*работать\nнад собой.*' },
+  { t0: 17.0, t1: 20.0, size: 150, text: 'Ты —\n*семейный\nчеловек.*' },
+  { t0: 24.0, t1: 27.0, size: 132, text: 'Может, пора\n*заняться\nспортом?*' },
+  { t0: 29.5, t1: 32.2, size: 124, text: 'Больше половины\nбюджета —\n*на неё.*' },
+  { t0: 32.2, t1: 35.0, size: 118, text: 'Ты\n*подкаблучник.*' },
+  { t0: 35.0, t1: 37.4, size: 132, text: 'А что скажут\n*твои траты?*' },
 ];
 const cardsEl = $('cards');
 CARDS.forEach(c => {
@@ -293,7 +292,7 @@ CARDS.forEach(c => {
         if (!w) return;
         if (/^\s+$/.test(w)) { ln.appendChild(document.createTextNode(' ')); return; }
         const s = document.createElement('span'); s.className = 'w' + (accent ? ' grad' : ''); s.textContent = w;
-        ln.appendChild(s); c.words.push({ el: s, at: c.t0 + idx++ * 0.075 });
+        ln.appendChild(s); c.words.push({ el: s, at: c.t0 + 0.15 + idx++ * 0.12 });
       });
     });
     el.appendChild(ln);
@@ -306,15 +305,15 @@ function renderCards(t) {
     const vis = t >= c.t0 && t < c.t1;
     c.el.style.display = vis ? '' : 'none';
     if (!vis) return;
-    const out = tw(t, c.t1 - 0.35, 0.35);
+    const out = tw(t, c.t1 - 0.5, 0.5);
     c.el.style.opacity = 1 - out;
     c.el.style.filter = out > 0.01 ? `blur(${out * 16}px)` : 'none';
-    c.el.style.transform = `translateY(calc(-50% - ${spring(t - (c.t1 - 0.35)) * 40}px)) scale(${1 + 0.02 * spring(t - c.t0)})`;
+    c.el.style.transform = `translateY(calc(-50% - ${spring(t - (c.t1 - 0.5)) * 30}px)) scale(${1 + 0.015 * clamp((t - c.t0) / (c.t1 - c.t0))})`;
     c.words.forEach(w => {
-      const o = tw(t, w.at, 0.8);
+      const o = tw(t, w.at, 1.2);
       w.el.style.opacity = o;
-      w.el.style.filter = o < 0.99 ? `blur(${(1 - o) * 18}px)` : 'none';
-      w.el.style.transform = `translateY(${(1 - spring(t - w.at)) * 60}px)`;
+      w.el.style.filter = o < 0.99 ? `blur(${(1 - o) * 14}px)` : 'none';
+      w.el.style.transform = `translateY(${(1 - spring(t - w.at)) * 36}px)`;
     });
     if (c.subEl) {
       const o = tw(t, c.subAt, 0.7);
@@ -405,13 +404,13 @@ window.renderFrame = function (t) {
   const ph = $('phone');
   ph.style.transform = `perspective(2600px) translate(${cx}px, ${cy}px) scale(${cs}) rotateY(${ry}deg)`;
   const dimAmt = clamp(look), hide = clamp(look - 1);
-  ph.style.filter = dimAmt > 0.01 ? `blur(${dimAmt * 30}px) brightness(${1 - 0.78 * dimAmt})` : 'none';
+  ph.style.filter = dimAmt > 0.01 ? `blur(${dimAmt * 32}px) brightness(${1 - 0.8 * dimAmt})` : 'none';
   ph.style.opacity = 1 - hide;
   $('glare').style.transform = `translateX(${Math.sin(t * 0.5) * 40}px)`;
 
   const sc = sceneAt(t);
   const vals = valuesAt(t);
-  const reveal = tw(t, 2.8, 1.4);
+  const reveal = tw(t, 3.5, 1.8);
   const pop = spring(t - sc.focusAt);
   const fadeAmt = clamp(tw(t, sc.focusAt, 0.6));
   drawPie(vals, reveal, sc.focus, pop, fadeAmt);
@@ -420,20 +419,20 @@ window.renderFrame = function (t) {
 
   // touch indicator on the green segment
   const tap = $('tap');
-  const tv = t > 3.95 && t < 4.6;
+  const tv = t > 4.95 && t < 5.7;
   tap.style.display = tv ? '' : 'none';
   tap.style.left = '578px'; tap.style.top = '458px';
-  tap.style.transform = `scale(${0.6 + spring(t - 3.95) * 0.5})`;
-  tap.style.opacity = tw(t, 3.95, 0.15) * (1 - tw(t, 4.25, 0.35));
+  tap.style.transform = `scale(${0.6 + spring(t - 4.95) * 0.5})`;
+  tap.style.opacity = tw(t, 4.95, 0.2) * (1 - tw(t, 5.3, 0.4));
 
   renderStats(t);
   renderCards(t);
 
   // end card
   const e = $('end');
-  e.style.display = t >= 27.5 ? 'flex' : 'none';
-  [['logoEnd', 27.55], ['endLine', 27.85], ['endSub', 28.15]].forEach(([id, t0]) => {
-    const o = tw(t, t0, 0.8);
+  e.style.display = t >= 37.5 ? 'flex' : 'none';
+  [['logoEnd', 37.6], ['endLine', 38.0], ['endSub', 38.4]].forEach(([id, t0]) => {
+    const o = tw(t, t0, 1.1);
     $(id).style.opacity = o;
     $(id).style.filter = o < 0.99 ? `blur(${(1 - o) * 16}px)` : 'none';
     $(id).style.transform = `translateY(${(1 - spring(t - t0)) * 40}px)`;
