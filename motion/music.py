@@ -166,8 +166,8 @@ for t0 in np.arange(0, DROP, BEAT):
 for b in np.arange(DROP, END_GROOVE - 1e-6, BEAT):
     add(kick(), b, 0.95)
     if int(round((b - DROP) / BEAT)) % 2 == 1:
-        add(clap(), b, 0.7)
-    add(hat(open_=True), b + BEAT / 2, 0.42, pan=0.2)
+        add(clap(), b, 0.4)
+    add(hat(open_=True), b + BEAT / 2, 0.28, pan=0.2)
     for k in range(4):
         add(hat(), b + k * BEAT / 4, 0.22 if k % 2 else 0.1, pan=-0.25)
     cl, cr = pluck_chord(CH[chord_at(b)])

@@ -4,7 +4,7 @@ const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const { spawn } = require('child_process');
 const path = require('path');
 
-const FPS = 30, DUR = 30;
+const FPS = 60, DUR = 30;
 
 (async () => {
   const browser = await chromium.launch();
@@ -36,7 +36,7 @@ const FPS = 30, DUR = 30;
     await page.evaluate(t => window.renderFrame(t), f / FPS);
     const buf = await page.screenshot({ type: 'png' });
     if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
-    if (f % 60 === 0) console.log(`frame ${f}/${total}`);
+    if (f % 300 === 0) console.log(`frame ${f}/${total}`);
   }
   ff.stdin.end();
   await new Promise(r => ff.on('close', r));
