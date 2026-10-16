@@ -176,7 +176,7 @@ const CATS = [
   { name: 'Здоровье', color: '#E5332A', ico: 'heart', tx: 6 },
   { name: 'Развлечения', color: '#2F6BFF', ico: 'ticket', tx: 24 },
   { name: 'Кальян', color: '#56627A', ico: 'smoke', tx: 18 },
-  { name: 'Спорт', color: '#00B8D9', ico: 'sport', tx: 1 },
+  { name: 'Спорт', color: '#00B8D9', ico: 'sport', tx: 7 },
   { name: 'Любимая', color: '#E8336E', ico: 'love', tx: 31 },
   { name: 'Остальные', color: '#9C7178', ico: 'folder', tx: 5 },
 ];
@@ -188,17 +188,26 @@ const SB = [61, 8, 6, 15, 7, 0, 0, 0, 0, 3];
 const C1 = [25, 15, 12, 10, 4, 0, 8, 22, 0, 4];
 const C2 = [18, 12, 9, 8, 3, 0, 47, 1, 0, 2];
 const SD = [14, 12, 9, 6, 2, 0, 0, 0, 56, 1];
+// amounts exactly as on the app screenshot (Расходы sheet)
+const A0 = [4225650, 2825000, 1550000, 1240000, 320000, 0, 0, 0, 0, 212000];
+const amountsOf = v => v === S0 ? A0 : v.map(p => Math.round(p / 100 * TOTAL / 1000) * 1000);
 // Timeline sits on a musical grid: 96 BPM, 1 bar = 2.5 s. Every cut lands on a downbeat.
 const KEYS = [
   [0, S0], [5.0, S0], [5.9, SA], [12.5, SA], [13.4, SB], [17.5, SB], [18.2, C1], [18.75, C1],
   [21.25, C2], [25, C2], [25.9, SD], [40, SD],
 ];
+// returns [shares, amounts, moving]
 function valuesAt(t) {
   for (let i = 0; i < KEYS.length - 1; i++) {
     const [ta, va] = KEYS[i], [tb, vb] = KEYS[i + 1];
-    if (t <= tb) { const p = ease(prog(t, ta, tb)); return va.map((v, j) => lerp(v, vb[j], p)); }
+    if (t <= tb) {
+      const p = ease(prog(t, ta, tb)), aa = amountsOf(va), ab = amountsOf(vb);
+      const moving = va !== vb && p > 0.001 && p < 0.995;
+      return [va.map((v, j) => lerp(v, vb[j], p)), aa.map((v, j) => lerp(v, ab[j], p)), moving];
+    }
   }
-  return KEYS[KEYS.length - 1][1];
+  const v = KEYS[KEYS.length - 1][1];
+  return [v, amountsOf(v), false];
 }
 
 // what the phone screen shows
@@ -245,7 +254,7 @@ const STATS = [
   { t0: 5.05, t1: 7.4, from: 0, to: 52, at: 5.0, dur: 0.9, pre: '', lbl: 'уходит на развлечения' },
   { t0: 12.55, t1: 14.9, from: 0, to: 61, at: 12.5, dur: 0.9, pre: '', lbl: 'уходит на продукты' },
   { t0: 17.55, t1: 18.75, title: 'Своя категория —\n«Кальян».' },
-  { t0: 18.75, t1: 22.4, from: 0, to: 39, at: 18.75, dur: 2.5, pre: '+', lbl: 'на кальян. Спорт — почти ноль.' },
+  { t0: 18.75, t1: 22.4, from: 8, to: 47, at: 18.75, dur: 2.5, pre: '', lbl: 'уходит на кальян. Месяц назад — 8%.' },
   { t0: 25.05, t1: 27.4, from: 0, to: 56, at: 25.0, dur: 0.9, pre: '', lbl: 'уходит на «Любимую»' },
 ];
 const statsEl = $('stats');
@@ -327,7 +336,7 @@ function renderCards(t) {
 
 // ---------------- pie ----------------
 const ctx = $('pie').getContext('2d');
-function drawPie(vals, reveal, focus, pop, fadeAmt) {
+function drawPie(vals, reveal, focus, pop, fadeAmt, moving) {
   ctx.clearRect(0, 0, 520, 520);
   const cx = 260, cy = 260, RO = 222, RI = 98, GAP = 7;
   const total = vals.reduce((a, b) => a + b, 0);
@@ -362,13 +371,14 @@ function drawPie(vals, reveal, focus, pop, fadeAmt) {
     ctx.globalAlpha = (l.isF || focus < 0) ? 1 : 1 - 0.5 * fadeAmt;
     ctx.font = `700 ${Math.round(31 * (l.isF ? 1 + 0.3 * pop : 1))}px Inter`;
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText((l.v < 1 ? '<1' : Math.round(l.v)) + '%', l.x, l.y);
+    const r1 = Math.round(l.v * 10) / 10;
+    ctx.fillText((l.v < 1 ? '<1' : (moving || r1 % 1 === 0 ? Math.round(l.v) : r1.toFixed(1))) + '%', l.x, l.y);
     ctx.restore();
   });
 }
 
 // ---------------- rows ----------------
-function renderRows(t, vals, sc) {
+function renderRows(t, vals, amts, sc) {
   const out = [];
   sc.rows.forEach((ci, k) => {
     const c = CATS[ci];
@@ -379,15 +389,15 @@ function renderRows(t, vals, sc) {
     const txt = ci === 9 ? `${c.tx} ${plural(c.tx, 'категория', 'категории', 'категорий')}` : `${c.tx} ${plural(c.tx, 'транзакция', 'транзакции', 'транзакций')}`;
     let badge = '';
     if (sc.id === 'C' && t > 18.75) {
-      const d = vals[ci] - C1[ci], o = tw(t, 18.75, 0.4);
-      if (ci === 6) badge = `<span class="badge" style="background:#D92D20;opacity:${o}">▲ +${Math.round(d)}%</span>`;
-      if (ci === 7) badge = `<span class="badge" style="background:#8E8E93;opacity:${o}">▼ ${Math.round(d)}%</span>`;
+      const o = tw(t, 18.75, 0.4);
+      if (ci === 6) badge = `<span class="badge" style="background:#D92D20;opacity:${o}">▲ было 8%</span>`;
+      if (ci === 7) badge = `<span class="badge" style="background:#8E8E93;opacity:${o}">▼ было 22%</span>`;
     }
     const hl = isF && fp > 0 ? `background:${mix('#F3F3F6', '#FFFFFF', fp)};box-shadow:0 0 0 ${3 * fp}px ${c.color}, 0 16px 40px rgba(0,0,0,${0.12 * fp});` : '';
     out.push(`<div class="row" style="opacity:${p};transform:translateY(${y}px);${hl}">
       <div class="ico" style="background:${c.color}">${svgIco(c.ico)}</div>
       <div class="rtxt"><div class="rname">${c.name}</div><div class="rsub">${txt}</div></div>
-      <div class="ramt">-${fmt(vals[ci] / 100 * TOTAL)} <small>UZS</small></div>${badge}</div>`);
+      <div class="ramt">-${fmt(amts[ci])} <small>UZS</small></div>${badge}</div>`);
   });
   $('rows').innerHTML = out.join('');
 }
@@ -411,13 +421,13 @@ window.renderFrame = function (t) {
   $('glare').style.transform = `translateX(${Math.sin(t * 0.5) * 40}px)`;
 
   const sc = sceneAt(t);
-  const vals = valuesAt(t);
+  const [vals, amts, moving] = valuesAt(t);
   const reveal = tw(t, 2.6, 1.6);
   const pop = spring(t - sc.focusAt);
   const fadeAmt = clamp(tw(t, sc.focusAt, 0.6));
-  drawPie(vals, reveal, sc.focus, pop, fadeAmt);
+  drawPie(vals, reveal, sc.focus, pop, fadeAmt, moving || reveal < 0.995);
   $('total').innerHTML = `−${fmt(TOTAL * reveal)}<small>.35 UZS</small>`;
-  renderRows(t, vals, sc);
+  renderRows(t, vals, amts, sc);
 
   // touch indicator on the green segment
   const tap = $('tap');
