@@ -4,3 +4,8 @@ __pycache__/
 .pytest_cache/
 dist/
 build/
+
+# Remotion / Node
+node_modules/
+out/
+.remotion/
