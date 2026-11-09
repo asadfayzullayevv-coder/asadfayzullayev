@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>ANORBANK ECO/MAD 2027</title>
+<style>
+@font-face{font-family:"InterT";src:url("fonts/Inter-Regular.ttf") format("truetype");font-weight:400}
+@font-face{font-family:"InterT";src:url("fonts/Inter-Medium.ttf") format("truetype");font-weight:500}
+@font-face{font-family:"InterT";src:url("fonts/Inter-SemiBold.ttf") format("truetype");font-weight:600}
+@font-face{font-family:"InterT";src:url("fonts/Inter-Bold.ttf") format("truetype");font-weight:700}
+@font-face{font-family:"InterT";src:url("fonts/Inter-ExtraBold.ttf") format("truetype");font-weight:800}
+@page { size: 1920px 1080px; margin: 0; }
+:root{
+  --bg:#F7F5F2; --card:#FFFFFF; --line:#E4DFD8; --line2:#D6CFC6;
+  --ink:#111318; --ink2:#2B2F38; --mute:#646A76; --mute2:#8A8F99;
+  --brand:#8C1A3E; --brand-d:#6E1230; --brand-t:#F6E9ED; --brand-l:#E9C9D3;
+  --teal:#0E7A6A; --teal-t:#E4F2EF;
+  --gold:#A46B1E; --gold-t:#F6EEE2;
+  --dark:#101218; --dark2:#1A1D26; --dline:#2C303B;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#ccc}
+body{font-family:"InterT",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;
+  font-feature-settings:"cv11","ss01","tnum" 0;}
+.slide{width:1920px;height:1080px;position:relative;overflow:hidden;background:var(--bg);
+  page-break-after:always;break-after:page;padding:88px 112px 0}
+.slide:last-child{page-break-after:auto}
+
+/* header */
+.top{position:absolute;left:0;right:0;top:0;height:8px;background:var(--brand)}
+.kicker{display:flex;align-items:center;gap:16px;font-size:20px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--brand)}
+.kicker .n{font-variant-numeric:tabular-nums;color:var(--ink);letter-spacing:.04em}
+.kicker .ln{width:40px;height:2px;background:var(--brand)}
+h1{font-size:60px;line-height:1.08;font-weight:700;letter-spacing:-.025em;margin-top:26px;color:var(--ink);max-width:1696px}
+h1 em{font-style:normal;color:var(--brand)}
+.lead{font-size:26px;line-height:1.45;color:var(--mute);margin-top:22px;max-width:1696px;font-weight:400}
+.lead b{color:var(--ink2);font-weight:600}
+
+/* footer */
+.foot{position:absolute;left:112px;right:112px;bottom:44px;display:flex;justify-content:space-between;align-items:center;
+  font-size:16px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute2);font-weight:500;
+  border-top:1px solid var(--line);padding-top:20px}
+.foot .brand{color:var(--ink2);font-weight:700;letter-spacing:.16em}
+.foot .brand i{font-style:normal;color:var(--brand)}
+.foot .pg{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.06em}
+
+/* body region */
+.body{position:absolute;left:112px;right:112px;top:var(--t,330px);bottom:var(--b,124px);display:flex;flex-direction:column;gap:32px}
+.grid{display:grid;gap:28px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.fill{flex:1;min-height:0}
+
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:40px 40px 38px;position:relative;display:flex;flex-direction:column}
+.card.acc{border-top:6px solid var(--c,var(--brand))}
+.card .num{font-size:20px;font-weight:700;color:var(--c,var(--brand));letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.card h3{font-size:32px;line-height:1.15;font-weight:700;letter-spacing:-.015em;color:var(--ink);margin-top:14px}
+.card h3:first-child{margin-top:0}
+.card p{font-size:24px;line-height:1.5;color:var(--ink2);margin-top:18px}
+.card p.m{color:var(--mute)}
+.card .lbl{font-size:16px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute2);margin-top:28px}
+.card .lbl+p{margin-top:8px}
+.card .out{margin-top:auto;padding-top:24px;border-top:1.5px solid var(--line);font-size:22px;font-weight:600;color:var(--c,var(--brand));line-height:1.35}
+.card .sp{margin-top:auto}
+
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.chip{font-size:19px;font-weight:500;color:var(--ink2);background:var(--bg);border:1.5px solid var(--line);border-radius:999px;padding:8px 16px;line-height:1.2}
+
+/* callout bars */
+.bar{border-radius:16px;padding:30px 40px;display:flex;align-items:center;gap:28px;font-size:26px;line-height:1.4;font-weight:600}
+.bar .tag{flex:none;font-size:16px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:9px 16px;border-radius:8px}
+.bar.dark{background:var(--dark);color:#fff}
+.bar.dark .tag{background:var(--brand);color:#fff}
+.bar.soft{background:var(--brand-t);color:var(--brand-d);border:1.5px solid var(--brand-l)}
+.bar.soft .tag{background:var(--brand);color:#fff}
+.bar.teal{background:var(--teal-t);color:#0B4F45;border:1.5px solid #BFDFD8}
+.bar.teal .tag{background:var(--teal);color:#fff}
+.note{font-size:21px;color:var(--mute);line-height:1.45;display:flex;gap:14px;align-items:flex-start}
+.note::before{content:"";flex:none;width:8px;height:8px;border-radius:2px;background:var(--brand);margin-top:12px}
+.note b{color:var(--ink2);font-weight:600}
+
+/* arrows */
+.flow{display:grid;grid-template-columns:1fr 56px 1fr 56px 1fr;align-items:stretch}
+.arrow{display:flex;align-items:center;justify-content:center}
+.arrow svg{width:30px;height:30px}
+
+/* dark slides */
+.slide.dk{background:var(--dark);color:#fff;padding:0}
+.dk .top{height:8px}
+.dk .wrap{position:absolute;left:150px;top:0;bottom:0;right:150px}
+.dk .rule{position:absolute;left:112px;top:190px;width:6px;height:560px;background:var(--brand);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- 01 COVER -->
+<section class="slide dk">
+  <div class="top"></div>
+  <svg style="position:absolute;right:-40px;bottom:-110px" width="900" height="700" viewBox="0 0 1000 760">
+    <text x="1000" y="640" text-anchor="end" font-family="InterT" font-weight="800" font-size="380" letter-spacing="-20"
+      fill="none" stroke="#262A35" stroke-width="2">2027</text>
+  </svg>
+  <div style="position:absolute;left:150px;top:120px;display:flex;align-items:center;gap:18px;font-size:22px;font-weight:700;letter-spacing:.2em">
+    <span style="width:14px;height:14px;background:var(--brand);border-radius:3px"></span>ANORBANK <span style="color:#7C8190;font-weight:500">· ECO/MAD</span>
+  </div>
+  <div style="position:absolute;left:150px;top:268px;width:1500px">
+    <div style="font-size:22px;font-weight:600;letter-spacing:.16em;color:#D7859F;text-transform:uppercase">Стратегия 2027</div>
+    <div style="font-size:96px;line-height:1.02;font-weight:800;letter-spacing:-.035em;margin-top:28px">От банковского приложения<br>к <span style="color:#E2577F">основному финансовому</span><br>помощнику</div>
+    <div style="display:flex;gap:12px;margin-top:52px">
+      <span class="chip" style="background:transparent;border-color:#3A3F4B;color:#E6E8EC;font-size:22px;padding:10px 20px">Ценность</span>
+      <span class="chip" style="background:transparent;border-color:#3A3F4B;color:#E6E8EC;font-size:22px;padding:10px 20px">Привычка</span>
+      <span class="chip" style="background:transparent;border-color:#3A3F4B;color:#E6E8EC;font-size:22px;padding:10px 20px">Экосистема</span>
+      <span class="chip" style="background:transparent;border-color:#3A3F4B;color:#E6E8EC;font-size:22px;padding:10px 20px">Экономика</span>
+    </div>
+  </div>
+  <div style="position:absolute;left:150px;width:860px;bottom:150px;border-top:1.5px solid var(--dline);padding-top:40px">
+    <div style="font-size:34px;line-height:1.35;font-weight:600">Не 58 обещаний. <span style="color:#A9AEBA;font-weight:500">Пять направлений, понятные KPI и запуск через проверяемые этапы.</span></div>
+  </div>
+  <div style="position:absolute;left:150px;bottom:72px;font-size:17px;letter-spacing:.14em;font-weight:600;color:#7C8190">ПРОЕКТ ДЛЯ ОБСУЖДЕНИЯ С РУКОВОДСТВОМ &nbsp;·&nbsp; 10 НОЯБРЯ 2026</div>
+</section>
+
+<!-- 02 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">02</span><span class="ln"></span>Стратегическое решение</div>
+  <h1>Сегодня просим утвердить <em>направление</em>,<br>а не весь бэклог</h1>
+  <div class="body" style="--t:356px">
+    <div class="grid g3 fill">
+      <div class="card acc"><div class="num">01 — ЗАЧЕМ</div>
+        <h3>Место, где клиент понимает деньги</h3>
+        <p class="m">Решает финансовые задачи и возвращается по собственной причине.</p></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">02 — ЧТО</div>
+        <h3>Пять направлений</h3>
+        <div class="chips"><span class="chip">Smart Money</span><span class="chip">Circle</span><span class="chip">Daily</span><span class="chip">Oila</span><span class="chip">Premium</span></div>
+        <p class="m">Приоритеты — через клиентскую ценность.</p></div>
+      <div class="card acc" style="--c:var(--gold)"><div class="num">03 — КАК</div>
+        <h3>Решения по фактам</h3>
+        <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px;font-size:22px;font-weight:500;color:var(--ink2)">
+          <div style="display:flex;gap:14px;align-items:center"><b style="color:var(--gold);width:22px">1</b>Сквозная аналитика</div>
+          <div style="display:flex;gap:14px;align-items:center"><b style="color:var(--gold);width:22px">2</b>Ограниченный MVP</div>
+          <div style="display:flex;gap:14px;align-items:center"><b style="color:var(--gold);width:22px">3</b>Пилот</div>
+          <div style="display:flex;gap:14px;align-items:center"><b style="color:var(--gold);width:22px">4</b>Решение о масштабировании</div>
+        </div></div>
+    </div>
+    <div class="bar dark"><span class="tag">Решение сегодня</span>
+      <span>Стратегия <span style="color:#E2577F">+</span> границы ответственности <span style="color:#E2577F">+</span> принципы финансирования и пилотов</span></div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">02</span></div>
+</section>
+
+<!-- 03 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">03</span><span class="ln"></span>Проблема</div>
+  <h1>Почему нужен новый подход</h1>
+  <div class="lead">Продукты и аудитория есть, но <b>сквозной картины клиентского пути недостаточно.</b></div>
+  <div class="body" style="--t:356px">
+    <div class="grid g3 fill">
+      <div class="card acc"><div class="num">01</div><h3>Не видим весь путь</h3>
+        <p class="m">От показа баннера и открытия раздела — до серверного результата и возврата клиента.</p></div>
+      <div class="card acc"><div class="num">02</div><h3>Путаем роли</h3>
+        <p class="m">Площадка не должна отвечать за ставки, скоринг и условия чужих продуктов.</p></div>
+      <div class="card acc"><div class="num">03</div><h3>Рискуем масштабировать идеи</h3>
+        <p class="m">Без базовой линии, контрольных групп и реальной экономики легко принять гипотезу за факт.</p></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 72px 1.35fr;align-items:stretch;gap:0">
+      <div style="background:#EDE9E4;border-radius:16px;padding:28px 36px">
+        <div style="font-size:16px;font-weight:700;letter-spacing:.14em;color:var(--mute2)">БЫЛО</div>
+        <div style="font-size:26px;font-weight:600;color:var(--mute);margin-top:8px">«Сколько сделали функций?»</div></div>
+      <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#8C1A3E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+      <div style="background:var(--dark);border-radius:16px;padding:28px 36px;color:#fff">
+        <div style="font-size:16px;font-weight:700;letter-spacing:.14em;color:#E2577F">СТАНОВИТСЯ</div>
+        <div style="font-size:26px;font-weight:600;margin-top:8px">«Какую пользу получил клиент и какой эффект доказан?»</div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">03</span></div>
+</section>
+
+<!-- 04 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">04</span><span class="ln"></span>Ответственность</div>
+  <h1>Наша модель: ECO/MAD управляет «Урикзором»</h1>
+  <div class="body" style="--t:272px">
+    <div class="grid g3 fill">
+      <div class="card acc"><div class="num">ECO/MAD</div><h3>= Площадка</h3>
+        <div class="chips"><span class="chip">Вход</span><span class="chip">Регистрация</span><span class="chip">Авторизация</span><span class="chip">Главная</span><span class="chip">Tab Bar</span><span class="chip">Поиск</span><span class="chip">«Все услуги»</span><span class="chip">Доступность</span><span class="chip">Общие клиентские пути</span></div></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">PO</div><h3>= Магазины</h3>
+        <div class="chips"><span class="chip">Продукт</span><span class="chip">Тарифы</span><span class="chip">Ставки</span><span class="chip">Скоринг</span><span class="chip">Правила выдачи</span><span class="chip">Продуктовые формы</span><span class="chip">Коммерческий результат</span></div></div>
+      <div class="card acc" style="--c:var(--gold)"><div class="num">ECO/MAD КАК PO</div><h3>Собственные продукты</h3>
+        <p class="m">Для Premium, Circle или Oila у направления появляется <b style="color:var(--ink)">отдельная бизнес-scorecard</b>.</p>
+        <p class="m">Партнёры делят ответственность.</p></div>
+    </div>
+    <div class="bar soft"><span class="tag">Принцип</span><span>Мы отвечаем за путь к магазину. За товар и условия магазина отвечает его владелец.</span></div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">04</span></div>
+</section>
+
+<!-- 05 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">05</span><span class="ln"></span>Клиентское обещание</div>
+  <h1>Одна идея для всех продуктов: <em>деньги под контролем</em></h1>
+  <div class="lead">Anor: «Понимай · Планируй · Действуй». <b>Не заставляем чаще тратить — помогаем принимать лучшие решения.</b></div>
+  <div class="body" style="--t:356px">
+    <div class="flow fill">
+      <div class="card acc"><div class="num">ШАГ 1</div><h3 style="font-size:44px">Понимай</h3>
+        <p class="m">Категории трат, обязательства, реальные деньги до зарплаты</p>
+        <div class="out">→ Снимаем неопределённость</div></div>
+      <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#8C1A3E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">ШАГ 2</div><h3 style="font-size:44px">Планируй</h3>
+        <p class="m">Бюджет, цель, календарь платежей, прогноз</p>
+        <div class="out">→ Создаём привычку</div></div>
+      <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#8C1A3E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+      <div class="card acc" style="--c:var(--gold)"><div class="num">ШАГ 3</div><h3 style="font-size:44px">Действуй</h3>
+        <p class="m">Автокопилка, оплата, семейные сценарии, полезные подсказки</p>
+        <div class="out">→ Формируем основной банк</div></div>
+    </div>
+    <div class="bar dark"><span class="tag">Тест функции</span><span>После неё клиент <span style="color:#E2577F">лучше управляет деньгами</span> — или просто чаще открывает приложение?</span></div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">05</span></div>
+</section>
+
+<!-- 06 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">06</span><span class="ln"></span>Портфель 2027</div>
+  <h1 style="font-size:56px">Пять направлений. Пять разных причин пользоваться Anor</h1>
+  <div class="body" style="--t:272px">
+    <div class="grid g3 fill" style="grid-template-rows:1fr 1fr">
+      <div class="card acc"><div class="num">01</div><h3>Smart Money</h3><p class="m" style="margin-top:6px">Финансовый контроль</p>
+        <div class="out" style="color:var(--ink2);font-weight:500"><b style="color:var(--brand)">Результат:</b> полезные действия и привычка накоплений</div></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">02</div><h3>Circle</h3><p class="m" style="margin-top:6px">Социальное распространение</p>
+        <div class="out" style="color:var(--ink2);font-weight:500"><b style="color:var(--teal)">Результат:</b> сборы, участники, новые активные</div></div>
+      <div class="card acc" style="--c:var(--gold)"><div class="num">03</div><h3>Daily</h3><p class="m" style="margin-top:6px">Повседневная причина</p>
+        <div class="out" style="color:var(--ink2);font-weight:500"><b style="color:var(--gold)">Результат:</b> повторное использование сервисов</div></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">04</div><h3>Oila</h3><p class="m" style="margin-top:6px">Семья и доверие</p>
+        <div class="out" style="color:var(--ink2);font-weight:500"><b style="color:var(--teal)">Результат:</b> активные семейные сценарии</div></div>
+      <div class="card acc"><div class="num">05</div><h3>Premium</h3><p class="m" style="margin-top:6px">Монетизация ценности</p>
+        <div class="out" style="color:var(--ink2);font-weight:500"><b style="color:var(--brand)">Результат:</b> платящие, удержание, contribution</div></div>
+      <div class="card" style="background:var(--dark);border-color:var(--dark);color:#fff;justify-content:center">
+        <div class="num" style="color:#E2577F">ВАЖНО</div>
+        <div style="font-size:64px;font-weight:800;letter-spacing:-.03em;margin-top:14px;line-height:1">58 <span style="color:#E2577F">≠</span> 58</div>
+        <p style="color:#C9CDD5;margin-top:18px">Функций в каталоге ≠ обязательств по разработке.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">06</span></div>
+</section>
+
+<!-- 07 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">07</span><span class="ln"></span>Продукт 1 · Smart Money</div>
+  <h1>Smart Money: из истории операций — <em>в управление деньгами</em></h1>
+  <div class="lead">Причина выбрать Anor — <b>понятная сумма, которую можно безопасно потратить сегодня.</b></div>
+  <div class="body" style="--t:372px">
+    <div class="flow fill">
+      <div class="card acc" style="--c:var(--mute2)"><div class="num">СЕЙЧАС</div><h3>Базовый PFM</h3>
+        <p class="m">Категоризация доходов и расходов, мониторинг.</p>
+        <div class="out" style="color:var(--ink2)">Базовые PFM-сценарии бесплатны</div></div>
+      <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#8C1A3E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+      <div class="card acc"><div class="num">СЛЕДУЮЩИЙ MVP</div><h3>«Можно тратить сегодня»</h3>
+        <div class="chips"><span class="chip">Бюджет до зарплаты</span><span class="chip">Календарь обязательств</span><span class="chip">Smart Salary</span><span class="chip">Bills Guardian</span></div>
+        <div class="out" style="color:var(--ink2)">Внедряем по этапам</div></div>
+      <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#8C1A3E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">БИЗНЕС-ЛОГИКА</div><h3>Доверие → рост</h3>
+        <p class="m">Клиент доверяет Anor повседневные финансовые решения.</p>
+        <div class="out">Растут полезные действия, удержание и использование каналов</div></div>
+    </div>
+    <div class="bar soft"><span class="tag">Меряем</span><span>Meaningful Financial Actions · повторное использование PFM · D30 · накопительные привычки</span></div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">07</span></div>
+</section>
+
+<!-- 08 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">08</span><span class="ln"></span>Продукты 2 и 3 · Circle и Oila</div>
+  <h1><em>Circle</em> привлекает через отношения.<br><span style="color:var(--teal)">Oila</span> удерживает через семью</h1>
+  <div class="body" style="--t:356px">
+    <div class="grid g2 fill">
+      <div class="card acc"><div class="num">CIRCLE · ОРГАНИЧЕСКИЙ РОСТ</div>
+        <div class="chips"><span class="chip">QR Тўёна</span><span class="chip">Сборы на подарок учителю</span><span class="chip">День рождения</span><span class="chip">Split Bill</span><span class="chip">Совместные цели</span></div>
+        <div class="lbl">Аргумент</div>
+        <p>Один организатор приводит целую группу людей. Польза возникает из реального социального действия, а не из покупки трафика.</p></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">OILA · СЕМЕЙНОЕ УДЕРЖАНИЕ</div>
+        <div class="chips"><span class="chip">Uzcard Kids</span><span class="chip">Детские цели и задания</span><span class="chip">Помощь пожилым родителям</span><span class="chip">Доверенный доступ</span></div>
+        <div class="lbl">Аргумент</div>
+        <p>Когда финансовые сценарии семьи связаны с Anor, ценность приложения повторяется каждый месяц.</p></div>
+    </div>
+    <div class="note"><span><b>Правовые условия:</b> групповые деньги и цифровой гап — только после заключений юристов и ЦБ; детские данные — с согласием.</span></div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">08</span></div>
+</section>
+
+<!-- 09 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">09</span><span class="ln"></span>Продукт 4 · Daily</div>
+  <h1>Daily и Anor Eats: причина <em>возвращаться чаще</em></h1>
+  <div class="lead">Повседневные сервисы усиливают привычку, <b>но акции должны помещаться в подтверждённый бюджет.</b></div>
+  <div class="body" style="--t:356px">
+    <div class="grid g3 fill">
+      <div class="card acc"><div class="num">ДЛЯ КЛИЕНТА</div><h3>Выгода сразу</h3>
+        <p class="m">Еда, транспорт, полезные партнёрские предложения. Выгоды понятны сразу, а не через месяцы ожидания.</p></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">ДЛЯ БАНКА</div><h3>Частота и действия</h3>
+        <p class="m">Повторные посещения, больше успешных заказов и финансовых действий. Доход сервиса учитываем отдельно.</p></div>
+      <div class="card acc" style="--c:var(--gold)"><div class="num">ЭКОНОМИКА DELEVER</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:14px 20px;align-items:baseline;margin-top:20px">
+          <span style="font-size:20px;color:var(--mute)">Сбор с НДС</span><span style="font-size:34px;font-weight:700;text-align:right">4 900 сум</span>
+          <span style="font-size:20px;color:var(--mute)">Доля банка</span><span style="font-size:34px;font-weight:700;text-align:right">30%</span>
+          <span style="font-size:20px;color:var(--mute);border-top:1.5px solid var(--line);padding-top:14px">Валово / заказ</span><span style="font-size:44px;font-weight:800;color:var(--gold);text-align:right;border-top:1.5px solid var(--line);padding-top:10px;letter-spacing:-.02em">1 470 сум</span>
+        </div>
+        <p class="m" style="font-size:19px;margin-top:auto;padding-top:16px">До уточнения условий. Вариант Premium ещё не согласован.</p></div>
+    </div>
+    <div class="bar soft"><span class="tag">Не обещаем</span><span>Бесплатную доставку и большие скидки — до договора и проверки экономики заказа.</span></div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">09</span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">10</span><span class="ln"></span>Продукт 5 · Premium</div>
+  <h1>Premium: продаём <em>измеримую ценность</em>,<br>а не доступ к базовым функциям</h1>
+  <div class="body" style="--t:356px">
+    <div class="grid g3 fill">
+      <div class="card" style="background:var(--brand);border-color:var(--brand);color:#fff">
+        <div class="num" style="color:#F3C4D2">ПОДПИСКА</div>
+        <div style="font-size:72px;font-weight:800;letter-spacing:-.035em;line-height:1;margin-top:18px">29 990</div>
+        <div style="font-size:24px;font-weight:600;color:#F3C4D2;margin-top:8px">сум / месяц</div>
+        <p style="color:#fff;margin-top:22px;font-size:22px">1 бесплатный пробный месяц по правилам eligibility</p>
+        <p style="color:#F3D9E1;font-size:20px;margin-top:auto;padding-top:18px;border-top:1.5px solid rgba(255,255,255,.25)">Выбор направлений выгоды · общий кошелёк с лимитами · отчёт об экономии · автоматизация · партнёры</p></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">ПОЧЕМУ КУПЯТ</div><h3>Видна конкретная экономия</h3>
+        <p class="m">Клиент видит экономию и полезные функции для своей роли.</p>
+        <div class="out" style="color:var(--ink2);font-weight:500">Но не все преимущества одинаково ценны для студента, родителя и зарплатного клиента.</div></div>
+      <div class="card acc" style="--c:var(--gold)"><div class="num">ПОЧЕМУ ОСТОРОЖНО</div><h3>Затраты ещё не проверены</h3>
+        <p class="m">Пробные месяцы, обязательства кошелька, партнёры и маржа банка требуют проверки.</p>
+        <div class="out" style="color:var(--ink2);font-weight:500">Тестируем пул <b style="color:var(--gold)">60 / 70 / 80%</b>, а не гарантируем прибыль.</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:24px 36px">
+      <div style="display:flex;align-items:center;gap:16px"><span style="width:16px;height:16px;border-radius:50%;background:var(--brand)"></span>
+        <div><div style="font-size:26px;font-weight:700">15.02.2027</div><div style="font-size:19px;color:var(--mute)">Ограниченный запуск</div></div></div>
+      <div style="flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--line2) 0 10px,transparent 10px 18px);margin:0 28px"></div>
+      <div style="font-size:19px;color:var(--mute);font-weight:500">платные когорты</div>
+      <div style="flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--line2) 0 10px,transparent 10px 18px);margin:0 28px"></div>
+      <div style="display:flex;align-items:center;gap:16px"><span style="width:16px;height:16px;border-radius:50%;background:var(--dark)"></span>
+        <div><div style="font-size:26px;font-weight:700">23.04.2027</div><div style="font-size:19px;color:var(--mute)">Решение о масштабе</div></div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">10</span></div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">11</span><span class="ln"></span>Финансы</div>
+  <h1>Экономика Premium: планируем по базовому сценарию, а не по мечте</h1>
+  <div class="lead">Числа — <b>расчёт модели, а не подтверждённые факты.</b> Разработка и команда в результат не включены.</div>
+  <div class="body" style="--t:356px">
+    <div class="grid g3 fill">
+      <div class="card"><div class="num" style="color:var(--mute2)">ПЛАТЯЩИХ · ДЕКАБРЬ 2027</div>
+        <div style="font-size:104px;font-weight:800;letter-spacing:-.045em;line-height:1;margin-top:auto">~49<span style="font-size:52px;letter-spacing:-.02em"> тыс.</span></div>
+        <div class="out" style="color:var(--mute);font-weight:500;margin-top:28px">Базовый сценарий</div></div>
+      <div class="card"><div class="num" style="color:var(--mute2)">ИТОГ ЗА 2027 · СУМ</div>
+        <div style="font-size:104px;font-weight:800;letter-spacing:-.045em;line-height:1;margin-top:auto;color:var(--brand)">−766<span style="font-size:52px;letter-spacing:-.02em"> млн</span></div>
+        <div class="out" style="color:var(--mute);font-weight:500;margin-top:28px">До затрат на разработку</div></div>
+      <div class="card"><div class="num" style="color:var(--mute2)">ДЕКАБРЬ 2027 · СУМ / МЕС.</div>
+        <div style="font-size:104px;font-weight:800;letter-spacing:-.045em;line-height:1;margin-top:auto;color:var(--teal)">+116<span style="font-size:52px;letter-spacing:-.02em"> млн</span></div>
+        <div class="out" style="color:var(--mute);font-weight:500;margin-top:28px">Месячный результат модели</div></div>
+    </div>
+    <div class="bar teal"><span class="tag">Условие роста</span><span>Подтвердить инкрементальный доход, реальные расходы выгод, trial-to-paid и churn. Без этого масштабирование необоснованно.</span></div>
+    <div class="note" style="margin-top:-8px"><span><b>Для защиты:</b> строгий сценарий без доп. дохода от карт и остатков = <b style="color:var(--brand)">−2,267 млрд сум</b> за 2027. Риск не скрываем.</span></div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">11</span></div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">12</span><span class="ln"></span>Измерение</div>
+  <h1>Как докажем результат: шесть KPI площадки + scorecard продуктов</h1>
+  <div class="lead"><b>North Star: MPAC-2+</b> — стратегическая метрика без отдельного веса. DAU, WAU, MAU — мониторинг посещаемости.</div>
+  <div class="body" style="--t:356px;gap:22px">
+    <!-- weight bar -->
+    <div style="display:flex;height:44px;border-radius:10px;overflow:hidden;font-size:18px;font-weight:700;color:#fff">
+      <div style="flex:15;background:#8C1A3E;display:flex;align-items:center;padding-left:14px">15%</div>
+      <div style="flex:10;background:#B04A6A;display:flex;align-items:center;padding-left:14px">10%</div>
+      <div style="flex:15;background:#6E1230;display:flex;align-items:center;padding-left:14px">15%</div>
+      <div style="flex:30;background:#111318;display:flex;align-items:center;padding-left:14px">30% · крупнейший вес</div>
+      <div style="flex:20;background:#3A3F4B;display:flex;align-items:center;padding-left:14px">20%</div>
+      <div style="flex:10;background:#646A76;display:flex;align-items:center;padding-left:14px">10%</div>
+    </div>
+    <div class="grid g3 fill" style="grid-template-rows:1fr 1fr;gap:20px">
+      <div class="card" style="padding:28px 32px"><div style="display:flex;align-items:baseline;gap:18px"><span style="font-size:48px;font-weight:800;color:#8C1A3E;letter-spacing:-.03em">15%</span><h3 style="font-size:26px">App MAC / MAU</h3></div><p class="m" style="margin-top:10px;font-size:21px">Доля активных, которые реально проводят операции</p></div>
+      <div class="card" style="padding:28px 32px"><div style="display:flex;align-items:baseline;gap:18px"><span style="font-size:48px;font-weight:800;color:#B04A6A;letter-spacing:-.03em">10%</span><h3 style="font-size:26px">First Value D7</h3></div><p class="m" style="margin-top:10px;font-size:21px">Первая финансовая ценность после регистрации</p></div>
+      <div class="card" style="padding:28px 32px"><div style="display:flex;align-items:baseline;gap:18px"><span style="font-size:48px;font-weight:800;color:#6E1230;letter-spacing:-.03em">15%</span><h3 style="font-size:26px">D30 Financial Retention</h3></div><p class="m" style="margin-top:10px;font-size:21px">Возвращается ли клиент через месяц</p></div>
+      <div class="card" style="padding:28px 32px;border-color:#111318;border-width:2px"><div style="display:flex;align-items:baseline;gap:18px"><span style="font-size:48px;font-weight:800;color:#111318;letter-spacing:-.03em">30%</span><h3 style="font-size:26px">Access · Navigation · Task</h3></div><p class="m" style="margin-top:10px;font-size:21px">Вход, путь к сервису, успех задачи</p></div>
+      <div class="card" style="padding:28px 32px"><div style="display:flex;align-items:baseline;gap:18px"><span style="font-size:48px;font-weight:800;color:#3A3F4B;letter-spacing:-.03em">20%</span><h3 style="font-size:26px">Digital Funnel Improvement</h3></div><p class="m" style="margin-top:10px;font-size:21px">Наши управляемые этапы</p></div>
+      <div class="card" style="padding:28px 32px"><div style="display:flex;align-items:baseline;gap:18px"><span style="font-size:48px;font-weight:800;color:#646A76;letter-spacing:-.03em">10%</span><h3 style="font-size:26px">Verified Mobile Contribution</h3></div><p class="m" style="margin-top:10px;font-size:21px">Доказанный добавочный эффект для PO</p></div>
+    </div>
+    <div class="note"><span><b>Веса предварительные:</b> утверждаем после реестра ответственности ECO/MAD, PO и BI.</span></div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">12</span></div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">13</span><span class="ln"></span>Аналитика и CDP</div>
+  <h1>Сначала <em>измерение</em>, затем масштабирование</h1>
+  <div class="body" style="--t:272px">
+    <div class="flow fill">
+      <div class="card acc"><div class="num">ШАГ 1</div><h3>Tracking</h3>
+        <p class="m">P0 по всему приложению: регистрация, вход, главная, «Все услуги», банковские воронки.</p>
+        <div class="out">Результат подтверждается сервером, а не кликом</div></div>
+      <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#8C1A3E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">ШАГ 2</div><h3>CDP</h3>
+        <p class="m">Клиент может быть одновременно родителем, зарплатником и активным P2P.</p>
+        <div class="out">Сегментация по поведению и потребности, а не произвольные ярлыки</div></div>
+      <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#8C1A3E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+      <div class="card acc" style="--c:var(--gold)"><div class="num">ШАГ 3</div><h3>Эксперименты</h3>
+        <p class="m">Базовая линия, согласованные с BI определения, контрольные группы.</p>
+        <div class="out">Разделяем технические и продуктовые отказы</div></div>
+    </div>
+    <div style="background:var(--dark);border-radius:16px;padding:28px 40px;color:#fff;display:flex;align-items:center;gap:40px">
+      <span class="tag" style="flex:none;font-size:16px;font-weight:700;letter-spacing:.14em;padding:9px 16px;border-radius:8px;background:var(--brand)">ВОРОТА</span>
+      <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:32px">
+        <div><div style="font-size:28px;font-weight:700">18.12.2026</div><div style="font-size:19px;color:#A9AEBA;margin-top:4px">Разметка P0</div></div>
+        <div><div style="font-size:28px;font-weight:700">15.01.2027</div><div style="font-size:19px;color:#A9AEBA;margin-top:4px">Базовая линия</div></div>
+        <div><div style="font-size:28px;font-weight:700">После проверки BI</div><div style="font-size:19px;color:#A9AEBA;margin-top:4px">Цели KPI</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">13</span></div>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">14</span><span class="ln"></span>Roadmap</div>
+  <h1>Дорожная карта 2027: каждое расширение — <em>только после ворот</em></h1>
+  <div class="body" style="--t:348px;gap:0">
+    <div style="display:grid;grid-template-columns:56px 360px 1fr 440px;font-size:16px;font-weight:700;letter-spacing:.14em;color:var(--mute2);padding:0 0 14px;border-bottom:1.5px solid var(--line2)">
+      <span></span><span>ПЕРИОД</span><span>ЧТО ДЕЛАЕМ</span><span>ВОРОТА / РЕЗУЛЬТАТ</span></div>
+    <div class="fill" style="display:grid;grid-template-rows:repeat(5,1fr);position:relative">
+      <div style="position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--line2)"></div>
+      <!-- rows -->
+      <div style="display:grid;grid-template-columns:56px 360px 1fr 440px;align-items:center;border-bottom:1.5px solid var(--line)">
+        <span style="width:24px;height:24px;border-radius:50%;background:var(--brand);border:5px solid var(--bg);box-shadow:0 0 0 2px var(--brand);position:relative"></span>
+        <span style="font-size:24px;font-weight:700">Ноябрь 26 — Январь 27</span><span style="font-size:23px;color:var(--ink2);padding-right:32px">KPI, CDP, Tracking P0, DWH, base line</span>
+        <span style="font-size:22px;font-weight:600;color:var(--brand)">Доказаны данные и ответственность</span></div>
+      <div style="display:grid;grid-template-columns:56px 360px 1fr 440px;align-items:center;border-bottom:1.5px solid var(--line)">
+        <span style="width:24px;height:24px;border-radius:50%;background:var(--brand);border:5px solid var(--bg);box-shadow:0 0 0 2px var(--brand);position:relative"></span>
+        <span style="font-size:24px;font-weight:700">Январь — Февраль</span><span style="font-size:23px;color:var(--ink2);padding-right:32px">Бета Premium 25.01 · технические ворота 12.02 · ограниченный запуск 15.02</span>
+        <span style="font-size:22px;font-weight:600;color:var(--brand)">Подтверждены списания, кошелёк, UX</span></div>
+      <div style="display:grid;grid-template-columns:56px 360px 1fr 440px;align-items:center;border-bottom:1.5px solid var(--line);background:var(--brand-t);margin:0 -16px;padding:0 16px;border-radius:12px">
+        <span style="width:24px;height:24px;border-radius:50%;background:var(--dark);border:5px solid var(--brand-t);box-shadow:0 0 0 2px var(--dark);position:relative"></span>
+        <span style="font-size:24px;font-weight:700">Март — Апрель</span><span style="font-size:23px;color:var(--ink2);padding-right:32px">Платные когорты · Circle только после юристов и capacity · gate 23.04</span>
+        <span style="font-size:22px;font-weight:700;color:var(--dark)"><span style="background:var(--dark);color:#fff;padding:6px 14px;border-radius:8px">Go / No-Go</span>&nbsp; масштабирования</span></div>
+      <div style="display:grid;grid-template-columns:56px 360px 1fr 440px;align-items:center;border-bottom:1.5px solid var(--line)">
+        <span style="width:24px;height:24px;border-radius:50%;background:var(--teal);border:5px solid var(--bg);box-shadow:0 0 0 2px var(--teal);position:relative"></span>
+        <span style="font-size:24px;font-weight:700">Май — Июнь</span><span style="font-size:23px;color:var(--ink2);padding-right:32px">Oila, Smart Salary, Bills Guardian, «Можно тратить», автокопилка</span>
+        <span style="font-size:22px;font-weight:600;color:var(--teal)">Запуск по готовности и нагрузке</span></div>
+      <div style="display:grid;grid-template-columns:56px 360px 1fr 440px;align-items:center">
+        <span style="width:24px;height:24px;border-radius:50%;background:var(--teal);border:5px solid var(--bg);box-shadow:0 0 0 2px var(--teal);position:relative"></span>
+        <span style="font-size:24px;font-weight:700">Июль — Декабрь</span><span style="font-size:23px;color:var(--ink2);padding-right:32px">Совместные цели, сезонные сценарии, статус, итоги года</span>
+        <span style="font-size:22px;font-weight:600;color:var(--teal)">Масштабируем подтверждённый спрос</span></div>
+    </div>
+    <div class="note" style="margin-top:20px"><span><b>30 спринтов</b> в исходном плане. Перечень из 58 функций — backlog, не безусловное обязательство.</span></div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">14</span></div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">15</span><span class="ln"></span>Риски и решения</div>
+  <h1>Какие условия должны быть выполнены<br>до масштабирования</h1>
+  <div class="body" style="--t:356px">
+    <div class="grid g3 fill">
+      <div class="card acc"><div class="num">01</div><h3>Финансовый контроль</h3>
+        <ul style="list-style:none;margin-top:22px;display:flex;flex-direction:column;gap:12px;font-size:23px;color:var(--ink2);line-height:1.35">
+          <li>— Пул и обязательства по выгодам</li><li>— Ограничения на акции</li><li>— Контроль trial и churn</li><li>— Реальная маржа каждой льготы</li></ul></div>
+      <div class="card acc" style="--c:var(--gold)"><div class="num">02</div><h3>Право и безопасность</h3>
+        <ul style="list-style:none;margin-top:22px;display:flex;flex-direction:column;gap:12px;font-size:23px;color:var(--ink2);line-height:1.35">
+          <li>— Детские данные — с согласием</li><li>— Деньги групп и цифровой гап — после юристов и ЦБ</li><li>— Никаких PIN / OTP / ПД в аналитике</li></ul></div>
+      <div class="card acc" style="--c:var(--teal)"><div class="num">03</div><h3>Мощность и партнёры</h3>
+        <ul style="list-style:none;margin-top:22px;display:flex;flex-direction:column;gap:12px;font-size:23px;color:var(--ink2);line-height:1.35">
+          <li>— MVP фиксируем после capacity review</li><li>— Delever, ATTO, eMaktab и другие преимущества не обещаем до подписания условий</li></ul></div>
+    </div>
+    <div class="bar dark"><span class="tag">Go / No-Go</span><span>Управленческое решение по данным, а не автоматическое выполнение календаря.</span></div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">15</span></div>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <div class="top"></div>
+  <div class="kicker"><span class="n">16</span><span class="ln"></span>Решения</div>
+  <h1>Что просим у руководства <em>10 ноября</em></h1>
+  <div class="lead">Пять конкретных решений, без которых стратегия останется красивой презентацией.</div>
+  <div class="body" style="--t:340px;gap:14px">
+    <div class="fill" style="display:grid;grid-template-rows:repeat(5,1fr);gap:14px">
+      <div style="display:grid;grid-template-columns:96px 380px 1fr 48px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:0 32px">
+        <span style="font-size:36px;font-weight:800;color:var(--brand);letter-spacing:-.02em">01</span><span style="font-size:28px;font-weight:700">Направление</span>
+        <span style="font-size:23px;color:var(--ink2)">Поддержать Financial Wellbeing 2027–2030 и клиентское обещание «деньги под контролем».</span>
+        <span style="width:32px;height:32px;border:2px solid var(--line2);border-radius:8px;justify-self:end"></span></div>
+      <div style="display:grid;grid-template-columns:96px 380px 1fr 48px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:0 32px">
+        <span style="font-size:36px;font-weight:800;color:var(--brand);letter-spacing:-.02em">02</span><span style="font-size:28px;font-weight:700">Продуктовый фокус</span>
+        <span style="font-size:23px;color:var(--ink2)">Одобрить пилот Anor Money / Smart Money; список MVP утвердить после оценки capacity.</span>
+        <span style="width:32px;height:32px;border:2px solid var(--line2);border-radius:8px;justify-self:end"></span></div>
+      <div style="display:grid;grid-template-columns:96px 380px 1fr 48px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:0 32px">
+        <span style="font-size:36px;font-weight:800;color:var(--brand);letter-spacing:-.02em">03</span><span style="font-size:28px;font-weight:700">Система управления</span>
+        <span style="font-size:23px;color:var(--ink2)">Согласовать модель ответственности ECO/MAD vs PO, шесть KPI и владельцев BI / DWH.</span>
+        <span style="width:32px;height:32px;border:2px solid var(--line2);border-radius:8px;justify-self:end"></span></div>
+      <div style="display:grid;grid-template-columns:96px 380px 1fr 48px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:0 32px">
+        <span style="font-size:36px;font-weight:800;color:var(--brand);letter-spacing:-.02em">04</span><span style="font-size:28px;font-weight:700">Premium</span>
+        <span style="font-size:23px;color:var(--ink2)">Разрешить подготовку ограниченного пилота при финансовых, юридических и технических воротах.</span>
+        <span style="width:32px;height:32px;border:2px solid var(--line2);border-radius:8px;justify-self:end"></span></div>
+      <div style="display:grid;grid-template-columns:96px 380px 1fr 48px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:0 32px">
+        <span style="font-size:36px;font-weight:800;color:var(--brand);letter-spacing:-.02em">05</span><span style="font-size:28px;font-weight:700">Внешние условия</span>
+        <span style="font-size:23px;color:var(--ink2)">Назначить владельцев решений по Delever, ATTO, карте Milliy, комплаенсу, финансам и процессингу.</span>
+        <span style="width:32px;height:32px;border:2px solid var(--line2);border-radius:8px;justify-self:end"></span></div>
+    </div>
+  </div>
+  <div class="foot"><span class="brand">ANOR<i>BANK</i> · ECO/MAD 2027</span><span>Проект для обсуждения · 10.11.2026</span><span class="pg">16</span></div>
+</section>
+
+<!-- 17 CLOSING -->
+<section class="slide dk">
+  <div class="top"></div>
+  <div style="position:absolute;left:150px;top:120px;display:flex;align-items:center;gap:18px;font-size:22px;font-weight:700;letter-spacing:.2em">
+    <span style="width:14px;height:14px;background:var(--brand);border-radius:3px"></span>ANORBANK <span style="color:#7C8190;font-weight:500">· ECO/MAD</span>
+  </div>
+  <div style="position:absolute;left:150px;top:300px;width:1600px">
+    <div style="font-size:92px;line-height:1.05;font-weight:800;letter-spacing:-.035em">Не конкурировать<br>количеством функций.<br><span style="color:#E2577F">Выигрывать реальной пользой.</span></div>
+  </div>
+  <div style="position:absolute;left:150px;right:150px;bottom:150px;display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1.5px solid var(--dline)">
+    <div style="padding:32px 32px 0 0"><div style="font-size:18px;font-weight:700;color:#E2577F;letter-spacing:.12em">01</div><div style="font-size:28px;font-weight:600;margin-top:10px">Измеряем клиентский путь</div></div>
+    <div style="padding:32px 32px 0 32px;border-left:1.5px solid var(--dline)"><div style="font-size:18px;font-weight:700;color:#E2577F;letter-spacing:.12em">02</div><div style="font-size:28px;font-weight:600;margin-top:10px">Улучшаем привычки</div></div>
+    <div style="padding:32px 32px 0 32px;border-left:1.5px solid var(--dline)"><div style="font-size:18px;font-weight:700;color:#E2577F;letter-spacing:.12em">03</div><div style="font-size:28px;font-weight:600;margin-top:10px">Проверяем экономику</div></div>
+    <div style="padding:32px 0 0 32px;border-left:1.5px solid var(--dline)"><div style="font-size:18px;font-weight:700;color:#E2577F;letter-spacing:.12em">04</div><div style="font-size:28px;font-weight:600;margin-top:10px">Масштабируем только то, что работает</div></div>
+  </div>
+  <div style="position:absolute;left:150px;bottom:72px;font-size:17px;letter-spacing:.14em;font-weight:600;color:#7C8190">ВОПРОСЫ И РЕШЕНИЯ</div>
+</section>
+
+</body>
+</html>
