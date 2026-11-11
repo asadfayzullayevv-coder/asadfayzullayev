@@ -4,3 +4,7 @@ __pycache__/
 .pytest_cache/
 dist/
 build/
+
+# Scale & Capital kit build
+Scale_Capital_Day1_Asad_Fayzullayev/_source/node_modules
+Scale_Capital_Day1_Asad_Fayzullayev/_source/cheatsheet.html
